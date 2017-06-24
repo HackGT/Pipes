@@ -1,0 +1,17 @@
+{
+  "name": "battle-of-the-hacks-4",
+  "version": "1.0.0",
+  "description": "TBD",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "license": "MIT",
+  "private": true,
+  "dependencies": {},
+  "devDependencies": {
+    "tslint": "^5.4.3",
+    "tslint-language-service": "^0.9.6",
+    "typescript": "^2.3.4"
+  }
+}
