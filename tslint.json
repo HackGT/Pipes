@@ -84,7 +84,6 @@
         "comment-format": [
             true,
             "check-space",
-            "check-uppercase"
         ],
         "encoding": true,
         "interface-name": [

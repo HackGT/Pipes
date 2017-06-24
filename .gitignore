@@ -57,3 +57,7 @@ typings/
 # dotenv environment variables file
 .env
 
+
+app\.js
+
+app\.js\.map
