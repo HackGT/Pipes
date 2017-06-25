@@ -28,7 +28,7 @@ async function loadPlugins(dir: string = "plugins") {
     for (let file of files) {
         if (path.extname(file) === ".js") {
             let module = require(path.join(__dirname, dir, file));
-            plugins[module.name] = module;
+            plugins[path.basename(file, ".js")] = module;
             console.log(`Loaded plugin: ${module.name} from ${file}`);
         }
     }
