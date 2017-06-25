@@ -28,26 +28,28 @@ export async function text2graph(plugins: Plugins, text: string, getIntegration:
         }
     }
 
-    let parsed: any[] = [];
+    let verb_split: any[] = [];
     let curr_verb = null;
 
     // parse into the available verbs
-    for (let token of tokens) {
+    for (let i = 0; i < tokens.length; i += 1) {
+        let token = tokens[i];
         if (token.partOfSpeech.tag == "VERB" && verbs[token.text.content]) {
             curr_verb = token.text.content;
-            parsed.push({
+            verb_split.push({
                 verb: curr_verb,
+                index: i,
                 tokens: []
             });
         }
         else {
-            if (parsed.length == 0) {
-                parsed.push({
+            if (verb_split.length == 0) {
+                verb_split.push({
                     hanging_begin: true,
                     tokens: [],
                 });
             }
-            parsed[parsed.length - 1].tokens.push(token);
+            verb_split[verb_split.length - 1].tokens.push(token);
         }
     }
 
@@ -55,8 +57,9 @@ export async function text2graph(plugins: Plugins, text: string, getIntegration:
     let constant_uid = 0;
     let last_plugin = -1;
 
-    // take out conjunctions and other special cases
-    for (let window of parsed) {
+    for (let i = 0; i < verb_split.length; i += 1) {
+        // take out conjunctions and other special cases
+        let window = verb_split[i];
         let window_text = window.tokens;
         // take out a last 'then'
         if (window_text[window_text.length - 1].text.content == "then") {
@@ -70,8 +73,8 @@ export async function text2graph(plugins: Plugins, text: string, getIntegration:
 
         // give it to the right plugin
         let plugin = plugins[verbs[window.verb]];
-        let parsed = plugin.parse_language(window.verb, window.tokens);
-        let step_id: string = `${verbs[window.verb]}-${commands.length}`;
+        let parsed = plugin.parse_language(window.verb, window.tokens, window.index);
+        let step_id: string = `${verbs[window.verb]}-${i}`;
         let inputs_covered: {[f: string]: boolean} = {};
 
         for (let input of Object.keys(parsed)) {
@@ -129,12 +132,31 @@ export async function text2graph(plugins: Plugins, text: string, getIntegration:
 }
 
 
+// import * as path from "path";
+// import * as fs from "fs";
+// import * as util from "util";
+
+// let plugins: { [pluginName: string]: any } = {}
+
+// async function loadPlugins(dir: string = "plugins") {
+//     let readdirAsync = util.promisify(fs.readdir) as (path: string | Buffer) => Promise<string[]>;
+//     let files = await readdirAsync(path.join(__dirname, dir));
+//     plugins = [];
+//     for (let file of files) {
+//         if (path.extname(file) === ".js") {
+//             let module = require(path.join(__dirname, dir, file));
+//             plugins[path.basename(file, ".js")] = module;
+//             console.log(`Loaded plugin: ${module.name} from ${file}`);
+//         }
+//     }
+// }
+
 // loadPlugins()
 //     .catch(console.error.bind(console))
 //         .then(a => {
 //             text2graph(
 //                 plugins,
-//                 "translate happy canadian independence day to french and then tweet it"
+//                 "translate happy canadian independence day to french and then tweet it and slack it to random"
 //             )
 //             .catch(console.error.bind(console))
 //             .then((i) => console.log(JSON.stringify(i, null, 4)));

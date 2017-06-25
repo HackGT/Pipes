@@ -10,7 +10,9 @@ export let inputs = {
     tweet: "string",
 };
 
-export let outputs = {};
+export let outputs = {
+    tweet: "string",
+};
 
 export let requires = {
     consumer_key: "string",
@@ -19,8 +21,8 @@ export let requires = {
     access_token_secret: "string",
 };
 
-export let run = (requires: any, args: any): Promise<void> => {
-    return new Promise<void>((resolve, reject) => {
+export let run = (requires: any, args: any): Promise<{tweet: string}> => {
+    return new Promise<{tweet: string}>((resolve, reject) => {
         // do twitter stuff
         let client = new Twitter({
             consumer_key: requires.consumer_key,
@@ -36,7 +38,9 @@ export let run = (requires: any, args: any): Promise<void> => {
             if (error) {
                 reject(error[0]);
             } else {
-                resolve();
+                resolve({
+                    tweet: args.tweet,
+                });
             }
         });
     });
