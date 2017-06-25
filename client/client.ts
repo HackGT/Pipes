@@ -35,14 +35,14 @@ graphInput.addEventListener("input", e => {
         headers: myHeaders
     })
     .then(res => res.json())
-    .then(res => {
+    .then((res: any) => {
         render(res.graph);
         currentGraph = res.graph;
     })
     .catch(e => {
         console.error(e);
-        var editor_child = document.getElementById("editor").children[0];
-        editor_child.parentNode.removeChild(editor_child);
+        var editor_child = document.getElementById("editor")!.children[0];
+        editor_child.parentNode!.removeChild(editor_child);
     });
 });
 let executeButton = document.getElementById("submitButton") as HTMLButtonElement;
