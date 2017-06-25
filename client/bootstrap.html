@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <link rel="stylesheet" href="css/bootstrap.min.css" />
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+        <div class="input-container">
+            <div class="input-group">
+                <label class="control-label" for="inputSuccess">Enter your input here</label>
+                <br />
+                <input class="form-control" id="inputSuccess" type="text" value="Sample text...">
+            </div>
+        </div>
+
+        <div class="multi-select">
+            <label for="select" class="col-lg-2-control-label">Transform Selection</label>
+            <div class="col-lg-2-control-label" onclick="updatePipe2()">
+                <select multiple="" class="form-control">
+                    <option value="translate">Example1</option>
+                    <option>Example2</option>
+                    <option>Example3</option>
+                    <option>Example4</option>
+                    <option>Example5</option>
+                    <option>Example6</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="multi-select">
+            <label for="select" class="col-lg-2-control-label">Output Selection</label>
+            <div class="col-lg-2-control-label">
+                <select multiple="" class="form-control">
+                    <option value="Twitter">Example1</option>
+                    <option> Example2</option>
+                    <option>Example3</option>
+                    <option>Example4</option>
+                    <option>Example5</option>
+                    <option>Example6</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="submit">
+            <button id="submitButton" type="submit" class="btn-success">Submit</button>
+        </div>
+    </body>
+</html>

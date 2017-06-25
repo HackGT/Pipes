@@ -94,7 +94,7 @@ export async function parseAndRun(plugins: {[field: string]: any}, parsedRequest
 
 const TEST_JSON: any = {
     "text": {
-        "value": "hi",
+        "value": "this is a test of the Georgia Tech emergency notification system",
         "language": "es",
         "output": {
             "translate_1.text": "text.value",
@@ -113,7 +113,7 @@ const TEST_JSON: any = {
         "plugin": "twitter",
         "output": {}
     }
-}
+};
 
 const PLUGINS: any = {
     "translate": {

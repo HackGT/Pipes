@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>Pipes</title>
+        <style>
+            * {
+                box-sizing: border-box;
+            }
+            html, body, #editor, textarea {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+            }
+            textarea {
+                width: 50%;
+                float: left;
+                padding: 40px;
+            }
+            #editor {
+                float: right;
+                width: 50%;
+                background-color: #eee;
+            }
+        </style>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.20.0/vis.min.css" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.20.0/vis.min.js"></script>
+        <script defer src="client.js"></script>
+    </head>
+    <body>
+        <textarea></textarea>
+        <section id="editor"></section>
+    </body>
+</html>

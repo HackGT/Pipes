@@ -1,0 +1,11 @@
+* {
+    box-sizing: border-box;
+}
+
+html, body, #editor 
+body {
+    background: #ffffff !important;
+}
+
+/*background: #C5E99B !important;
+border-color: #C5E99B !important;*/

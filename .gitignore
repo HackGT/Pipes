@@ -58,7 +58,7 @@ typings/
 .env
 
 # Get javascript
-*.js
+plugins/*.js
 *.js.map
 
 app\.js
@@ -66,3 +66,6 @@ app\.js
 app\.js\.map
 
 db\.db
+
+client/client\.js
+runner.js
