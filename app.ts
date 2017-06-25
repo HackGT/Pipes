@@ -6,8 +6,9 @@ import * as express from "express";
 import * as compression from "compression";
 import * as bodyParser from "body-parser";
 // import * as cookieParser from "cookie-parser";
-import * as Datastore from "nedb";
+import { parseAndRun } from "./runner"
 
+import * as Datastore from "nedb";
 const db = new Datastore({ filename: "db.db", autoload: true });
 
 const PORT = 3000;
@@ -80,6 +81,21 @@ app.route("/integration/setup/:plugin/:name")
             }); 
         });
     });
+
+app.route("/run").post(bodyParser.json(), async (request, response) => {
+    let graph = request.body;
+    await parseAndRun(plugins, graph, instanceName => {
+        return new Promise<any>((resolve, reject) => {
+            db.findOne<any>({ instanceName }, (err, doc) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+                resolve(doc.data);
+            });
+        });
+    });
+});
 
 app.listen(PORT, () => {
 	console.log(`BoH4 system started on port ${PORT}`);

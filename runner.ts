@@ -1,5 +1,6 @@
 interface InputFormat {
     [nodeName: string]: {
+        instance?: string;
         plugin?: string;
         output: {
             [nodeAndValue: string]: string;
@@ -8,7 +9,7 @@ interface InputFormat {
     }
 }
 
-export async function parseAndRun(plugins: {[field: string]: any}, json: string): Promise<void> {
+export async function parseAndRun(plugins: {[field: string]: any}, json: string, dbDataCb: (instanceName: string) => Promise<any>): Promise<void> {
     let parsedRequest: InputFormat = JSON.parse(json);
     let completed: {[node: string]: boolean} = {};
 
@@ -39,9 +40,9 @@ export async function parseAndRun(plugins: {[field: string]: any}, json: string)
     async function traverse(nodeName: string) {
         let node = parsedRequest[nodeName];
 
-        if (node.plugin) {
+        if (node.plugin && node.instance) {
             // get the setup stuff
-            let required = {};
+            let required = await dbDataCb(node.instance);
 
             // run the plugin
             console.log("Running", nodeName);
@@ -95,12 +96,14 @@ const TEST_JSON: any = {
         }
     },
     "translate_1": {
+        "instance": "Translate 1",
         "plugin": "translate",
         "output": {
             "twitter_1.tweet":  "translate_1.translated"
         }
     },
     "twitter_1": {
+        "instance": "Twitter 1",
         "plugin": "twitter",
         "output": {}
     }
@@ -131,7 +134,9 @@ const PLUGINS: any = {
 }
 
 export async function test() {
-    return await parseAndRun(PLUGINS, JSON.stringify(TEST_JSON));
+    return await parseAndRun(PLUGINS, JSON.stringify(TEST_JSON), name => {
+        return new Promise<any>((resolve, reject) => resolve({}))
+    });
 }
 
 // test().then(console.log.bind(console)).catch(console.error.bind(console));
