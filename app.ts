@@ -29,9 +29,14 @@ async function loadPlugins(dir: string = "plugins") {
     plugins = [];
     for (let file of files) {
         if (path.extname(file) === ".js") {
-            let module = require(path.join(__dirname, dir, file));
-            plugins[path.basename(file, ".js")] = module;
-            console.log(`Loaded plugin: ${module.name} from ${file}`);
+            try {
+                let module = require(path.join(__dirname, dir, file));
+                plugins[path.basename(file, ".js")] = module;
+                console.log(`Loaded plugin: ${module.name} from ${file}`);
+            }
+            catch (err) {
+                console.warn(`Could not load plugin from ${file}: ${err.message}`);
+            }
         }
     }
 }
@@ -76,6 +81,12 @@ app.route("/integration/setup/:plugin/:name")
             "plugin": pluginName,
             "instanceName": instanceName
         }, (err, doc) => {
+            if (!doc) {
+                response.json({
+                    "error": "The requested instance or plugin could not be found"
+                });
+                return;
+            }
             response.json({
                 "success": true,
                 "data": doc
