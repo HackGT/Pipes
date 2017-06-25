@@ -54,9 +54,9 @@ export function parse_language(verb: string, tokens: any[]): Inputs {
     let text = [];
 
     for (let i = 0; i < tokens.length; i += 1) {
-        if (languages[tokens[i].text.content]) {
+        if (languages.long_to_short[tokens[i].text.content]) {
             // we found the language
-            language = languages[tokens[i].text.content];
+            language = languages.long_to_short[tokens[i].text.content];
 
             // commonly the word before is a desc. prep.
             if (tokens[i - 1] && tokens[i - 1].partOfSpeech.tag === "ADP") {
