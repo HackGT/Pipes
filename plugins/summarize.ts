@@ -1,9 +1,9 @@
 const unirest = require("unirest");
-<<<<<<< HEAD
+
 const {exec} = require('child_process');
-=======
+
 import {exec} from "child_process";
->>>>>>> refs/remotes/origin/master
+
 
 export let name = "Summarizer";
 
