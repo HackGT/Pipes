@@ -21,8 +21,10 @@ export async function text2graph(plugins: Plugins, text: string): Promise<GraphS
     let verbs: {[verb: string]: string} = {};
 
     for (let plug of Object.keys(plugins)) {
-        for (let verb of plugins[plug].verbs) {
-            verbs[verb] = plug;
+        if (plugins[plug].verbs) {
+            for (let verb of plugins[plug].verbs) {
+                verbs[verb] = plug;
+            }
         }
     }
 
@@ -110,6 +112,8 @@ export async function text2graph(plugins: Plugins, text: string): Promise<GraphS
         commands.push({
             [step_id]: {
                 plugin: verbs[window.verb],
+                // TODO
+                instance: "",
                 output: {},
             },
         });
@@ -154,6 +158,6 @@ loadPlugins()
                 "translate happy canadian independence day to french and then tweet it"
             )
             .catch(console.error.bind(console))
-            .then(console.log.bind(console));
+            .then((i) => console.log(JSON.stringify(i, null, 4)));
         })
 
