@@ -24,7 +24,8 @@
     "request": "^2.81.0",
     "serve-static": "^1.12.3",
     "slack-node": "^0.1.8",
-    "twitter": "^1.7.1"
+    "twitter": "^1.7.1",
+    "unirest": "^0.5.1"
   },
   "devDependencies": {
     "@types/body-parser": "^1.16.4",
