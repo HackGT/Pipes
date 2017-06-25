@@ -5,6 +5,7 @@ import * as express from "express";
 // import * as serveStatic from "serve-static";
 import * as compression from "compression";
 import * as bodyParser from "body-parser";
+import * as _ from "lodash";
 // import * as cookieParser from "cookie-parser";
 import { parseAndRun } from "./runner"
 
@@ -81,9 +82,22 @@ app.route("/integration/setup/:plugin/:name")
             }); 
         });
     });
-
-app.route("/run").post(bodyParser.json(), async (request, response) => {
+app.route("/graph/:graphName").get((request : any, response) => {
+    response.json(request.graph);
+})
+app.route("/graph/:name/create").post(bodyParser.json(), async (request, response) => {
     let graph = request.body;
+    db.update({graphName: request.params.name}, {graphName: request.params.name, 
+        graph: JSON.stringify(graph)}, {upsert: true}, (err) => {
+        console.error(err);
+    });
+    response.json({success: true});
+});
+app.route("/graph/:graphName/run/").post(bodyParser.json(), async (request : any, response) => {
+    let graph = request.graph;
+    for (let key of Object.keys(request.body)) {
+        _.set(graph,key, request.body[key]);
+    }
     await parseAndRun(plugins, graph, instanceName => {
         return new Promise<any>((resolve, reject) => {
             db.findOne<any>({ instanceName }, (err, doc) => {
@@ -99,6 +113,16 @@ app.route("/run").post(bodyParser.json(), async (request, response) => {
         "success": true
     });
 });
+app.param('graphName', (req: any, res, next, graphName) => {
+    db.findOne<any>({ graphName }, (err, doc) => {
+            if (err) {
+                next(err);
+                return;
+            }
+            req.graph = JSON.parse(doc.graph);
+            next();
+        });
+})
 
 app.listen(PORT, () => {
 	console.log(`BoH4 system started on port ${PORT}`);
