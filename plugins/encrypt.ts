@@ -1,11 +1,11 @@
 import * as crypto from "crypto";
 
 export let name = "Encryption";
+export let verbs = ["encrypt"];
 export let inputs = {
     "data": "string"
 }
 export let outputs = {
-    "authTag": "string",
     "encrypted": "string"
 }
 
@@ -19,8 +19,22 @@ export let run = (requires: any, input: any) => {
         let encrypted = cipher.update(input.data, "utf8", "hex");
         encrypted += cipher.final("hex");
         resolve({
-            "authTag": cipher.getAuthTag().toString("hex"),
-            "encrypted": encrypted
+            "encrypted": JSON.stringify({
+                "authTag": cipher.getAuthTag().toString("hex"),
+                "encrypted": encrypted
+            })
         });
     });
+}
+
+export function parse_language(verb: string, tokens: any[]) {
+    let text: string[] = [];
+
+    for (let token of tokens) {
+        text.push(token.text.content);
+    }
+
+    return {
+        data: text.length === 0 ? null : text.join(" ")
+    }
 }
