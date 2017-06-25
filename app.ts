@@ -1,3 +1,4 @@
+import * as assert from "assert";
 import * as fs from "fs";
 import * as path from "path";
 import * as util from "util";
@@ -31,6 +32,13 @@ async function loadPlugins(dir: string = "plugins") {
         if (path.extname(file) === ".js") {
             try {
                 let module = require(path.join(__dirname, dir, file));
+                // Test if module is valid
+                assert(module.name, "Module missing name");
+                assert(module.inputs, "Module missing inputs");
+                assert(module.outputs, "Module missing outputs");
+                assert(module.requires, "Module missing requires");
+                assert(module.run, "Module missing run method");
+
                 plugins[path.basename(file, ".js")] = module;
                 console.log(`Loaded plugin: ${module.name} from ${file}`);
             }
