@@ -2,6 +2,8 @@ const Twitter = require("twitter");
 // TODO
 // import * as Twitter from "twitter";
 
+export let name = "Tweet to Twitter";
+
 export let inputs = [
     "text",
 ];
@@ -15,8 +17,7 @@ export let requires = {
     access_token_secret: "text",
 };
 
-
-export let run = (requires: object, text: string) => {
+export let run = (requires: object, text: string): Promise<void> => {
     return new Promise<void>((resolve, reject) => {
         // do twitter stuff
         let client = new Twitter(requires);
