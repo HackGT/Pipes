@@ -1,3 +1,4 @@
+import * as assert from "assert";
 import * as fs from "fs";
 import * as path from "path";
 import * as util from "util";
@@ -31,9 +32,21 @@ async function loadPlugins(dir: string = "plugins") {
     plugins = [];
     for (let file of files) {
         if (path.extname(file) === ".js") {
-            let module = require(path.join(__dirname, dir, file));
-            plugins[path.basename(file, ".js")] = module;
-            console.log(`Loaded plugin: ${module.name} from ${file}`);
+            try {
+                let module = require(path.join(__dirname, dir, file));
+                // Test if module is valid
+                assert(module.name, "Module missing name");
+                assert(module.inputs, "Module missing inputs");
+                assert(module.outputs, "Module missing outputs");
+                assert(module.requires, "Module missing requires");
+                assert(module.run, "Module missing run method");
+
+                plugins[path.basename(file, ".js")] = module;
+                console.log(`Loaded plugin: ${module.name} from ${file}`);
+            }
+            catch (err) {
+                console.warn(`Could not load plugin from ${file}: ${err.message}`);
+            }
         }
     }
 }
@@ -78,6 +91,12 @@ app.route("/integration/setup/:plugin/:name")
             "plugin": pluginName,
             "instanceName": instanceName
         }, (err, doc) => {
+            if (!doc) {
+                response.json({
+                    "error": "The requested instance or plugin could not be found"
+                });
+                return;
+            }
             response.json({
                 "success": true,
                 "data": doc
@@ -100,20 +119,28 @@ app.route("/graph/:graphName/run/").post(bodyParser.json(), async (request : any
     for (let key of Object.keys(request.body)) {
         _.set(graph,key, request.body[key]);
     }
-    await parseAndRun(plugins, graph, instanceName => {
-        return new Promise<any>((resolve, reject) => {
-            db.findOne<any>({ instanceName }, (err, doc) => {
-                if (err) {
-                    reject(err);
-                    return;
-                }
-                resolve(doc.data);
+    try {
+        await parseAndRun(plugins, graph, instanceName => {
+            return new Promise<any>((resolve, reject) => {
+                db.findOne<any>({ instanceName }, (err, doc) => {
+                    if (err) {
+                        reject(err);
+                        return;
+                    }
+                    resolve(doc.data);
+                });
             });
         });
-    });
-    response.json({
-        "success": true
-    });
+        response.json({
+            "success": true
+        });
+    }
+    catch (err) {
+        response.json({
+            "error": err.message,
+            "stack": err.stack
+        });
+    }
 });
 app.param('graphName', (req: any, res, next, graphName) => {
     db.findOne<any>({ graphName }, (err, doc) => {
@@ -131,7 +158,32 @@ app.param('graphName', (req: any, res, next, graphName) => {
             }
             next();
         });
-})
+});
+
+app.route("/run/").post(bodyParser.json(), async (request : any, response) => {
+    try {
+        await parseAndRun(plugins, request.body, instanceName => {
+            return new Promise<any>((resolve, reject) => {
+                db.findOne<any>({ instanceName }, (err, doc) => {
+                    if (err) {
+                        reject(err);
+                        return;
+                    }
+                    resolve(doc.data);
+                });
+            });
+        });
+        response.json({
+            "success": true
+        });
+    }
+    catch (err) {
+        response.json({
+            "error": err.message,
+            "stack": err.stack
+        });
+    }
+});
 
 app.listen(PORT, () => {
 	console.log(`BoH4 system started on port ${PORT}`);
