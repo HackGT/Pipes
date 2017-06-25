@@ -8,6 +8,9 @@ import * as compression from "compression";
 
 const PORT = 3000;
 let plugins: any[] = []
+// let secrets: {
+//     [service: string]: any
+// } = {};
 
 export let app = express();
 app.use(compression());
@@ -19,10 +22,17 @@ async function loadPlugins(dir: string = "plugins") {
     let files = await readdirAsync(path.join(__dirname, dir));
     plugins = [];
     for (let file of files) {
-        plugins.push(require(file));
+        if (path.extname(file) === ".js") {
+            plugins.push(require(path.join(__dirname, dir, file)));
+            console.log(`Loaded plugin: ${file}`);
+        }
     }
 }
-loadPlugins().catch(err => console.error(err));
+async function loadSecrets(file: string = "config.json") {
+
+}
+loadPlugins().catch(console.error.bind(console));
+loadSecrets().catch(console.error.bind(console));
 
 app.route("/").get((request, response) => {
     response.send("Hello, world!");
