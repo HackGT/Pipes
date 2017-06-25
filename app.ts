@@ -4,10 +4,14 @@ import * as util from "util";
 import * as express from "express";
 // import * as serveStatic from "serve-static";
 import * as compression from "compression";
+import * as bodyParser from "body-parser";
 // import * as cookieParser from "cookie-parser";
+import * as Datastore from "nedb";
+
+const db = new Datastore({ filename: "db.db", autoload: true });
 
 const PORT = 3000;
-let plugins: any[] = []
+let plugins: { [pluginName: string]: any } = {}
 // let secrets: {
 //     [service: string]: any
 // } = {};
@@ -23,8 +27,9 @@ async function loadPlugins(dir: string = "plugins") {
     plugins = [];
     for (let file of files) {
         if (path.extname(file) === ".js") {
-            plugins.push(require(path.join(__dirname, dir, file)));
-            console.log(`Loaded plugin: ${file}`);
+            let module = require(path.join(__dirname, dir, file));
+            plugins[module.name] = module;
+            console.log(`Loaded plugin: ${module.name} from ${file}`);
         }
     }
 }
@@ -37,6 +42,44 @@ loadSecrets().catch(console.error.bind(console));
 app.route("/").get((request, response) => {
     response.send("Hello, world!");
 });
+
+app.route("/integration/setup/:plugin/:name")
+    .post(bodyParser.json(), (request, response) => {
+        let pluginName = request.params.plugin as string;
+        let instanceName = request.params.name as string;
+        if (!plugins[pluginName]) {
+            response.status(500).json({
+                "error": "Invalid plugin name"
+            });
+            return;
+        }
+        
+        db.update({
+            "plugin": pluginName,
+            "instanceName": instanceName,
+        },
+        {
+            "plugin": pluginName,
+            "instanceName": instanceName,
+            "data": request.body
+        }, {upsert: true});
+        response.json({
+            "success": true
+        });
+    })
+    .get((request, response) => {
+        let pluginName = request.params.plugin as string;
+        let instanceName = request.params.name as string;
+        db.findOne({
+            "plugin": pluginName,
+            "instanceName": instanceName
+        }, (err, doc) => {
+            response.json({
+                "success": true,
+                "data": doc
+            }); 
+        });
+    });
 
 app.listen(PORT, () => {
 	console.log(`BoH4 system started on port ${PORT}`);

@@ -64,3 +64,5 @@ typings/
 app\.js
 
 app\.js\.map
+
+db\.db

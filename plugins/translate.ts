@@ -4,6 +4,7 @@ const projectId = "testfirstapp1";
 // TODO
 // import * as Twitter from "twitter";
 
+export let name = "Translater"
 export let inputs = {
     "text": "text",
     "langauge": "text"
