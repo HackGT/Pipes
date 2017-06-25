@@ -2,7 +2,8 @@
 
 // TODO: make credentials.js get the needed information for emailing, fix promise being treated as value error, change tests
 
-var nodemailer = require("nodemailer");
+
+import * as nodemailer from "nodemailer";
 var credentials = require("./credentials.ts")
 
 export let transporter = nodemailer.createTransport({
@@ -38,7 +39,7 @@ export let requires = {
 
 export let run = (requires: any): Promise<void> => {
 	return new Promise<void> ((resolve, reject) => {
-		transporter.sendMail(mailOptions, function(error, info) {
+		transporter.sendMail(mailOptions, (error, info) => {
 		    if (error) {
 		        reject(error);
 		    } else {
