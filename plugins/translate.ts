@@ -6,20 +6,20 @@ const projectId = "testfirstapp1";
 
 export let name = "Translater"
 export let inputs = {
-    "text": "text",
-    "langauge": "text"
+    "text": "string",
+    "language": "string"
 }
 
 export let outputs = {
-    "out": "text"
+    "translated": "string"
 }
 
 export let requires = {
-    api_key: "text"
+    api_key: "string"
 };
 
 export let run = (requires: any, input: any) => {
-    return new Promise<string>((resolve, reject) => {
+    return new Promise<any>((resolve, reject) => {
         const translateClient = Translate({
             projectId: projectId,
             key: requires.api_key
@@ -27,7 +27,7 @@ export let run = (requires: any, input: any) => {
         translateClient.translate(input.text, input.language)
         .then((results: any) => {
             const translation = results[0];
-            resolve(translation);
+            resolve({ "translated": translation });
         })
         .catch((err: any) => {
             console.error('ERROR:', err);

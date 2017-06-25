@@ -9,8 +9,9 @@ interface InputFormat {
     }
 }
 
-export async function parseAndRun(plugins: {[field: string]: any}, json: string, dbDataCb: (instanceName: string) => Promise<any>): Promise<void> {
-    let parsedRequest: InputFormat = JSON.parse(json);
+const maxDepth = 100;
+
+export async function parseAndRun(plugins: {[field: string]: any}, parsedRequest: InputFormat, dbDataCb: (instanceName: string) => Promise<any>): Promise<void> {
     let completed: {[node: string]: boolean} = {};
 
     function isReady(nodeName: string): boolean {
@@ -69,6 +70,7 @@ export async function parseAndRun(plugins: {[field: string]: any}, json: string,
 
     let containsIncomplete: boolean = true;
 
+    let depth = 0;
     while (containsIncomplete) {
         containsIncomplete = false;
         for (let nodeName of Object.keys(parsedRequest)) {
@@ -83,15 +85,19 @@ export async function parseAndRun(plugins: {[field: string]: any}, json: string,
             console.log("Complete", nodeName);
             completed[nodeName] = true;
         }
+        if (depth++ > maxDepth) {
+            console.error(`Max depth of ${maxDepth} exceeded!`);
+            break;
+        }
     }
 }
 
 const TEST_JSON: any = {
     "text": {
         "value": "hi",
-        "language": "spanish",
+        "language": "es",
         "output": {
-            "translate_1.sentence": "text.value",
+            "translate_1.text": "text.value",
             "translate_1.language": "text.language"
         }
     },
@@ -103,7 +109,7 @@ const TEST_JSON: any = {
         }
     },
     "twitter_1": {
-        "instance": "Twitter 1",
+        "instance": "hackgt twitter",
         "plugin": "twitter",
         "output": {}
     }
@@ -134,7 +140,7 @@ const PLUGINS: any = {
 }
 
 export async function test() {
-    return await parseAndRun(PLUGINS, JSON.stringify(TEST_JSON), name => {
+    return await parseAndRun(PLUGINS, TEST_JSON, name => {
         return new Promise<any>((resolve, reject) => resolve({}))
     });
 }

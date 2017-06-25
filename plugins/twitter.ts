@@ -5,7 +5,7 @@ const Twitter = require("twitter");
 export let name = "Tweeter";
 
 export let inputs = {
-    tweet: "text",
+    tweet: "string",
 };
 
 export let outputs = {};

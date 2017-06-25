@@ -95,6 +95,9 @@ app.route("/run").post(bodyParser.json(), async (request, response) => {
             });
         });
     });
+    response.json({
+        "success": true
+    });
 });
 
 app.listen(PORT, () => {
