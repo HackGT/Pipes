@@ -2,20 +2,20 @@ declare let vis: any;
 
 // create an array with nodes
   var nodes = new vis.DataSet([
-    {id: 1, label: 'Node 1'},
-    {id: 2, label: 'Node 2'},
-    {id: 3, label: 'Node 3'},
-    {id: 4, label: 'Node 4'},
-    {id: 5, label: 'Node 5'}
+    {id: 1, label: 'Node 1', shape:'circle', color:"#6EAC29"},
+    {id: 2, label: 'Node 2', shape:'circle', color:"#F9A11B"},
+    {id: 3, label: 'Node 3', shape:'circle', color:"#60C5BA"},
+    {id: 4, label: 'Node 4', shape:'circle', color:"#f26d5b"},
+    {id: 5, label: 'Node 5', shape:'circle', color:"#A593E0"}
   ]);
 
   // create an array with edges
   var edges = new vis.DataSet([
-    {from: 1, to: 3},
-    {from: 1, to: 2},
-    {from: 2, to: 4},
-    {from: 2, to: 5},
-    {from: 3, to: 3}
+    {from: 1, to: 3, arrows:'to'},
+    {from: 1, to: 2, arrows:'to'},
+    {from: 2, to: 4, arrows:'to'},
+    {from: 2, to: 5, arrows:'to'},
+    {from: 3, to: 3, arrows:'to'}
   ]);
 
   // create a network
