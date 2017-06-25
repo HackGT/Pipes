@@ -1,6 +1,5 @@
 const unirest = require("unirest");
-const {exec} = require('child_process');
-const extractor = require('unfluff');
+import {exec} from "child_process";
 
 export let name = "Summarizer";
 
@@ -31,7 +30,7 @@ export let run = (input: any, requires: any) => {
 			.header("Accept", "application/json")
 			.send("sentnum=" + requires.length)
 			.send("text=" + JSON.parse(stdout).text)
-			.end(function (result) {
+			.end(function (result: any) {
 			 	var summary = "";
 			 	for (var i = 0; i < result.body.sentences.length; i++) {
 			 		summary += result.body.sentences[i];

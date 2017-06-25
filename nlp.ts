@@ -1,7 +1,7 @@
 import { InputFormat } from "./runner";
 
 const language = require("@google-cloud/language")({
-    key: "AIzaSyDWkI00Um5GxP5Hu1R2I2uRf5FxpmiR7bs",
+    keyFile: "./secret/secrets.json",
     projectId: "testfirstapp1",
 });
 

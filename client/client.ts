@@ -2,7 +2,7 @@ declare let vis: any;
 
 let currentGraph: any;
 
-var loc = new URL(window.location.toString());
+var loc = new URL(window.location.toString()) as any;
 if (loc.searchParams.get("graph")) {
     fetch(`http://localhost:3000/graph/${loc.searchParams.get("graph")}/`).then(res => res.json()).then(graph => {
         render(graph);
@@ -28,7 +28,7 @@ graphInput.addEventListener("keyup", e => {
         method: "POST",
         body: JSON.stringify({text: graphInput.value}),
         headers: myHeaders
-    }).then(res => res.json()).then(res => {
+    }).then(res => res.json()).then((res: any) => {
         render(res.graph);
         currentGraph = res.graph;
     });
