@@ -2,7 +2,7 @@
 
 // TODO: make credentials.js get the needed information for emailing, fix promise being treated as value error, change tests
 
-var nodemailer = require("nodemailer");
+import * as nodemailer from "nodemailer";
 
 export let name = "Send email";
 

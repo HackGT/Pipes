@@ -1,4 +1,4 @@
-interface InputFormat {
+export interface InputFormat {
     [nodeName: string]: {
         instance?: string;
         plugin?: string;

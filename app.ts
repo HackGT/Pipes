@@ -7,9 +7,10 @@ import * as express from "express";
 import * as compression from "compression";
 import * as bodyParser from "body-parser";
 import * as _ from "lodash";
-import * as cors from "cors";
+const cors = require('cors');
 // import * as cookieParser from "cookie-parser";
 import { parseAndRun } from "./runner"
+import { text2graph } from "./nlp"
 
 import * as Datastore from "nedb";
 const db = new Datastore({ filename: "db.db", autoload: true });
@@ -40,6 +41,7 @@ async function loadPlugins(dir: string = "plugins") {
                 assert(module.outputs, "Module missing outputs");
                 assert(module.requires, "Module missing requires");
                 assert(module.run, "Module missing run method");
+                assert(module.parse_language, "Module missing language parse method");
 
                 plugins[path.basename(file, ".js")] = module;
                 console.log(`Loaded plugin: ${module.name} from ${file}`);
@@ -185,6 +187,43 @@ app.route("/run/").post(bodyParser.json(), async (request : any, response) => {
     }
 });
 
+app.route("/nlp/").post(bodyParser.json(), async (request : any, response) => {
+    try {
+        var graph = await text2graph(plugins, request.body.text, pluginName => {
+            return new Promise<any>((resolve, reject) => {
+                db.findOne<any>({plugin: pluginName}, (err, doc) => {
+                    if (err) {
+                        reject(err);
+                        return;
+                    }
+                    resolve(doc.instanceName);
+                })
+            })
+        } )
+        await parseAndRun(plugins, graph!, (instanceName : string) => {
+            return new Promise<any>((resolve, reject) => {
+                db.findOne<any>({ instanceName }, (err, doc) => {
+                    if (err) {
+                        reject(err);
+                        return;
+                    }
+                    resolve(doc.data);
+                });
+            });
+        });
+        response.json({
+            "success": true,
+            "graph": graph!
+        });
+    }
+    catch (err) {
+        console.log("error")
+        response.json({
+            "error": err.message,
+            "stack": err.stack
+        });
+    }
+});
 app.listen(PORT, () => {
 	console.log(`BoH4 system started on port ${PORT}`);
 });

@@ -1,5 +1,4 @@
-const Slack = require('slack-node');
-
+import * as Slack from "slack-node";
 export let name = "Slack Webhooks";
 
 export let inputs = {

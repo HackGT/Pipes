@@ -1,13 +1,13 @@
-import { GraphSchema } from "./runner";
+import { InputFormat } from "./runner";
 
 const language = require("@google-cloud/language")({
-    keyFilename: "secret/key.json",
+    key: "AIzaSyDWkI00Um5GxP5Hu1R2I2uRf5FxpmiR7bs",
     projectId: "testfirstapp1",
 });
 
 type Plugins = {[p: string]: any};
 
-export async function text2graph(plugins: Plugins, text: string): Promise<GraphSchema | null> {
+export async function text2graph(plugins: Plugins, text: string, getIntegration: (instanceName: string) => Promise<any>): Promise<InputFormat | null> {
     let annotation = await new Promise<any>((resolve, reject) => {
         language.annotate(text, (err: Error, annotation: any) => {
             if (err) {
@@ -51,7 +51,7 @@ export async function text2graph(plugins: Plugins, text: string): Promise<GraphS
         }
     }
 
-    let commands: GraphSchema[] = [];
+    let commands: InputFormat[] = [];
     let constant_uid = 0;
     let last_plugin = -1;
 
@@ -100,11 +100,10 @@ export async function text2graph(plugins: Plugins, text: string): Promise<GraphS
                 }
                 console.log(input, "not covered! getting it from last output");
                 let id = Object.keys(commands[last_plugin])[0];
-                let plugin = plugins[commands[last_plugin][id].plugin];
+                let plugin = plugins[commands[last_plugin][id].plugin!];
                 let output = Object.keys(plugin.outputs)[0];
 
-                commands[last_plugin][id].output[`${id}.${output}`] =
-                    `${step_id}.${input}`;
+                commands[last_plugin][id].output[`${step_id}.${input}`] = `${id}.${output}`;
             }
         }
 
@@ -112,15 +111,14 @@ export async function text2graph(plugins: Plugins, text: string): Promise<GraphS
         commands.push({
             [step_id]: {
                 plugin: verbs[window.verb],
-                // TODO
-                instance: "",
+                instance: await getIntegration(verbs[window.verb]),
                 output: {},
             },
         });
     }
 
 
-    let graph: GraphSchema = {};
+    let graph: InputFormat = {};
 
     for (let command of commands) {
         let id = Object.keys(command)[0];
@@ -131,33 +129,14 @@ export async function text2graph(plugins: Plugins, text: string): Promise<GraphS
 }
 
 
-import * as path from "path";
-import * as fs from "fs";
-import * as util from "util";
-
-let plugins: { [pluginName: string]: any } = {}
-
-async function loadPlugins(dir: string = "plugins") {
-    let readdirAsync = util.promisify(fs.readdir) as (path: string | Buffer) => Promise<string[]>;
-    let files = await readdirAsync(path.join(__dirname, dir));
-    plugins = [];
-    for (let file of files) {
-        if (path.extname(file) === ".js") {
-            let module = require(path.join(__dirname, dir, file));
-            plugins[path.basename(file, ".js")] = module;
-            console.log(`Loaded plugin: ${module.name} from ${file}`);
-        }
-    }
-}
-
-loadPlugins()
-    .catch(console.error.bind(console))
-        .then(a => {
-            text2graph(
-                plugins,
-                "translate happy canadian independence day to french and then tweet it"
-            )
-            .catch(console.error.bind(console))
-            .then((i) => console.log(JSON.stringify(i, null, 4)));
-        })
+// loadPlugins()
+//     .catch(console.error.bind(console))
+//         .then(a => {
+//             text2graph(
+//                 plugins,
+//                 "translate happy canadian independence day to french and then tweet it"
+//             )
+//             .catch(console.error.bind(console))
+//             .then((i) => console.log(JSON.stringify(i, null, 4)));
+//         })
 

@@ -32,9 +32,9 @@ export let run = (requires: any, args: any): Promise<void> => {
         // post tweet
         client.post("statuses/update", {
             status: args.tweet,
-        }, (error: Error) => {
+        }, (error: Error[]) => {
             if (error) {
-                reject(error);
+                reject(error[0]);
             } else {
                 resolve();
             }

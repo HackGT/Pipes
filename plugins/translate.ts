@@ -1,7 +1,8 @@
 const Translate = require('@google-cloud/translate');
 const projectId = "testfirstapp1";
+import * as fs from "fs";
 
-import * as languages from "./languages.json";
+const languages = JSON.parse(fs.readFileSync("./plugins/languages.json", "utf8"));
 
 // TODO
 // import * as Twitter from "twitter";
