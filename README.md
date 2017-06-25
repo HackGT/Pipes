@@ -1,1 +1,2 @@
-# Battle-of-the-Hacks-4
+# Pipes (from HackGT)
+Bringing the power of Unix pipelines to the web
