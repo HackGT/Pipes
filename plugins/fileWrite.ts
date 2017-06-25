@@ -29,7 +29,7 @@ export function parse_language(verb: string, tokens: any[]) {
     }
     if (text.length >= 3 && text[0] === "it" && text[1] === "to") {
         return {
-            filePath: text[2],
+            filePath: text.slice(2).join(""),
             data: null
         }
     }

@@ -35,6 +35,6 @@ export function parse_language(verb: string, tokens: any[]): Inputs {
     }
 
     return {
-        filePath: text.length === 0 ? null : text[0]
+        filePath: text.length === 0 ? null : text.join("")
     }
 }
