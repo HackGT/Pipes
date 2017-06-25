@@ -41,9 +41,12 @@ export async function parseAndRun(plugins: {[field: string]: any}, parsedRequest
     async function traverse(nodeName: string) {
         let node = parsedRequest[nodeName];
 
-        if (node.plugin && node.instance) {
+        if (node.plugin) {
             // get the setup stuff
-            let required = await dbDataCb(node.instance);
+            let required;
+            if (node.instance) {
+                required = await dbDataCb(node.instance);
+            }
 
             // run the plugin
             console.log("Running", nodeName);

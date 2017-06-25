@@ -16,10 +16,12 @@
     "compression": "^1.6.2",
     "cookie-parser": "^1.4.3",
     "cors": "^2.8.3",
+    "crypto": "0.0.3",
     "express": "^4.15.3",
     "lodash": "^4.17.4",
     "nedb": "^1.8.0",
     "nodemailer": "^4.0.1",
+    "request": "^2.81.0",
     "serve-static": "^1.12.3",
     "slack-node": "^0.1.8",
     "twitter": "^1.7.1"

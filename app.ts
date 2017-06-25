@@ -196,7 +196,7 @@ app.route("/nlp/").post(bodyParser.json(), async (request : any, response) => {
                         reject(err);
                         return;
                     }
-                    resolve(doc.instanceName);
+                    resolve(doc ? doc.instanceName : null);
                 })
             })
         } )
