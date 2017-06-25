@@ -1,5 +1,9 @@
 const unirest = require("unirest");
+<<<<<<< HEAD
+const {exec} = require('child_process');
+=======
 import {exec} from "child_process";
+>>>>>>> refs/remotes/origin/master
 
 export let name = "Summarizer";
 
@@ -28,7 +32,7 @@ export let run = (input: any, requires: any) => {
 			.header("X-Mashape-Key", "0ZMCFUgJcZmsheN5g0vybr743wQ3p16mXWzjsnkZtcNv6rfY3O")
 			.header("Content-Type", "application/x-www-form-urlencoded")
 			.header("Accept", "application/json")
-			.send("sentnum=" + requires.length)
+			.send("sentnum=" + "5")
 			.send("text=" + JSON.parse(stdout).text)
 			.end(function (result: any) {
 			 	var summary = "";
@@ -47,3 +51,12 @@ export let run = (input: any, requires: any) => {
 	})
 }
 
+export let verbs = ["summarize"];
+
+export function parse_language(verb: string, tokens: any[]) {
+	if (tokens[0] === "it") {
+		return {url: null};
+	} else {
+		return {url: tokens[0]};
+	}
+}
