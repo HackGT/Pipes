@@ -55,6 +55,6 @@ export function parse_language(verb: string, tokens: any[]) {
 	if (tokens[0] === "it") {
 		return {url: null};
 	} else {
-		return {url: tokens[0]};
+		return {url: tokens[0].text.content};
 	}
 }
