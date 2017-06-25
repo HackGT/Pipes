@@ -127,7 +127,8 @@ app.route("/graph/:graphName/run/").post(bodyParser.json(), async (request : any
     }
     catch (err) {
         response.json({
-            "error": err.message
+            "error": err.message,
+            "stack": err.stack
         });
     }
 });
@@ -161,7 +162,8 @@ app.route("/run/").post(bodyParser.json(), async (request : any, response) => {
     }
     catch (err) {
         response.json({
-            "error": err.message
+            "error": err.message,
+            "stack": err.stack
         });
     }
 });

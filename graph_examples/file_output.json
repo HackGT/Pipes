@@ -1,0 +1,28 @@
+{
+    "text": {
+        "value": "this is a test of the Georgia Tech emergency notification system",
+        "output": {
+            "encrypt_1.data": "text.value"
+        }
+    },
+    "encrypt_1": {
+        "instance": "Encrypt",
+        "plugin": "encrypt",
+        "output": {
+            "decrypt_1.authTag":  "encrypt_1.authTag",
+            "decrypt_1.encrypted": "encrypt_1.encrypted"
+        }
+    },
+    "decrypt_1": {
+        "instance": "Decrypt",
+        "plugin": "decrypt",
+        "output": {
+        	"writer_1.data": "decrypt_1.data"
+        }
+    },
+    "writer_1": {
+    	"instance": "writer",
+    	"plugin": "fileWrite",
+    	"output": {}
+    }
+}
