@@ -14,12 +14,12 @@ if (loc.searchParams.get("graph")) {
 let graphInput = document.getElementById("graphInput") as HTMLInputElement;
 let lastKeyFrame = new Date().valueOf();
 const DEBOUNCE_INTERVAL = 50; // ms
-graphInput.addEventListener("keyup", e => {
+graphInput.addEventListener("input", e => {
     if (new Date().valueOf() - lastKeyFrame < DEBOUNCE_INTERVAL) {
         return;
     }
     lastKeyFrame = new Date().valueOf();
-    
+
 
     var myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
