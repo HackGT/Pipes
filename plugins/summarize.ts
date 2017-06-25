@@ -1,4 +1,5 @@
 const unirest = require("unirest");
+const striptags = require("striptags");
 
 import {exec} from "child_process";
 
@@ -19,30 +20,30 @@ export let requires = {
 
 export let run = (input: any, requires: any) => {
 	return new Promise<any>((resolve, reject) => {
-		exec("curl -s " + input.url + " | unfluff", (err, stdout, stderr) => {
-			if (err) {
-				console.error(err);
-				return;
-			}
+			request("https://arstechnica.com/gaming/2017/06/roundup-the-best-escape-room-games-for-a-breakout-party/", function(error, response, body) {
+				//console.log(body);
+				data = striptags(body);
+				//console.log(data);
 
-			// get summary
-			unirest.post("https://textanalysis-text-summarization.p.mashape.com/text-summarizer-text")
-			.header("X-Mashape-Key", "0ZMCFUgJcZmsheN5g0vybr743wQ3p16mXWzjsnkZtcNv6rfY3O")
-			.header("Content-Type", "application/x-www-form-urlencoded")
-			.header("Accept", "application/json")
-			.send("sentnum=" + "5")
-			.send("text=" + JSON.parse(stdout).text)
-			.end(function (result: any) {
-			 	var summary = "";
-			 	for (var i = 0; i < result.body.sentences.length; i++) {
-			 		summary += result.body.sentences[i];
-			 		summary += " ";
-			 	}
-			 	resolve({"summarized": summary});
-			}).catch((err: any) => {
-				console.error("ERROR: ", err);
-				reject(err);
-			});
+				unirest.post("https://textanalysis-text-summarization.p.mashape.com/text-summarizer-text")
+				.header("X-Mashape-Key", "0ZMCFUgJcZmsheN5g0vybr743wQ3p16mXWzjsnkZtcNv6rfY3O")
+				.header("Content-Type", "application/x-www-form-urlencoded")
+				.header("Accept", "application/json")
+				.send("sentnum=" + "5")
+				.send("text=" + data)
+				.end(function (result: any) {
+				 	var summary = "";
+				 	for (var i = 0; i < result.body.sentences.length; i++) {
+				 		summary += result.body.sentences[i];
+				 		summary += " ";
+				 	}
+				 	resolve({"summarized": summary});
+				}).catch((err: any) => {
+					console.error("ERROR: ", err);
+					reject(err);
+				});
+			})
+
 		});
 
 		
