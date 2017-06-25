@@ -140,7 +140,31 @@ app.param('graphName', (req: any, res, next, graphName) => {
             req.graph = JSON.parse(doc.graph);
             next();
         });
-})
+});
+
+app.route("/run/").post(bodyParser.json(), async (request : any, response) => {
+    try {
+        await parseAndRun(plugins, request.body, instanceName => {
+            return new Promise<any>((resolve, reject) => {
+                db.findOne<any>({ instanceName }, (err, doc) => {
+                    if (err) {
+                        reject(err);
+                        return;
+                    }
+                    resolve(doc.data);
+                });
+            });
+        });
+        response.json({
+            "success": true
+        });
+    }
+    catch (err) {
+        response.json({
+            "error": err.message
+        });
+    }
+});
 
 app.listen(PORT, () => {
 	console.log(`BoH4 system started on port ${PORT}`);
