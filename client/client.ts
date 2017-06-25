@@ -13,6 +13,12 @@ if (loc.searchParams.get("graph")) {
 // Attach event handlers
 let graphInput = document.getElementById("graphInput") as HTMLInputElement;
 let lastKeyFrame = new Date().valueOf();
+
+document.addEventListener("keydown", e => {
+    console.log("keydown");
+    graphInput.focus();
+}, false);
+
 const DEBOUNCE_INTERVAL = 50; // ms
 graphInput.addEventListener("input", e => {
     if (new Date().valueOf() - lastKeyFrame < DEBOUNCE_INTERVAL) {
