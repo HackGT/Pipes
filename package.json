@@ -9,6 +9,7 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
+    "@google-cloud/language": "^0.10.5",
     "@google-cloud/translate": "^0.8.2",
     "@types/slack-node": "^0.1.1",
     "body-parser": "^1.17.2",

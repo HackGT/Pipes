@@ -4,6 +4,8 @@ const Twitter = require("twitter");
 
 export let name = "Tweeter";
 
+export let verbs = ["tweet"];
+
 export let inputs = {
     tweet: "string",
 };
@@ -39,4 +41,27 @@ export let run = (requires: any, args: any): Promise<void> => {
         });
     });
 };
+
+export interface Inputs {
+    tweet: string | null,
+}
+
+export function parse_language(verb: string, tokens: any[]): Inputs {
+    // we know verb will only ever be to tweet something
+    // we're just going to take all the words, except for 'it'
+    let text: string[] = [];
+
+    for (let token of tokens) {
+        text.push(token.text.content);
+    }
+
+    // if it's "it" we have to get it from somewhere else
+    if (text.length === 1 && text[0] === "it") {
+        text = [];
+    }
+
+    return {
+        tweet: text.length == 0 ? null : text.join(" "),
+    };
+}
 
