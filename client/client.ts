@@ -1,13 +1,40 @@
 declare let vis: any;
 
+let currentGraph: any;
+
 var loc = new URL(window.location.toString());
 if (loc.searchParams.get("graph")) {
-    fetch(`http://localhost:3000/graph/${loc.searchParams.get("graph")}/`).then((res) => {
-        return res.json();
-    }).then((graph) => {
+    fetch(`http://localhost:3000/graph/${loc.searchParams.get("graph")}/`).then(res => res.json()).then(graph => {
         render(graph);
+        currentGraph = graph;
     });
 }
+
+// Attach event handlers
+let graphInput = document.getElementById("graphInput") as HTMLInputElement;
+let lastKeyFrame = new Date().valueOf();
+const DEBOUNCE_INTERVAL = 50; // ms
+graphInput.addEventListener("onkeyup", e => {
+    if (new Date().valueOf() - lastKeyFrame < DEBOUNCE_INTERVAL) {
+        return;
+    }
+    lastKeyFrame = new Date().valueOf();
+    
+    let body = new FormData();
+    body.append("text", graphInput.value);
+    fetch(`http://localhost:3000/nlp`, {
+        credentials: "same-origin",
+        method: "PUT",
+        body
+    }).then(res => res.json()).then(res => {
+        render(res.graph);
+        currentGraph = res.graph;
+    });
+});
+let executeButton = document.getElementById("submitButton") as HTMLButtonElement;
+executeButton.addEventListener("click", e => {
+
+});
 
 function render(graph: any) {
     var colors = ["#6EAC29", "#F9A11B", "#60C5BA", "#f26d5b", "#A593E0"];
