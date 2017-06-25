@@ -9,6 +9,7 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
+    "@google-cloud/translate": "^0.8.2",
     "compression": "^1.6.2",
     "cookie-parser": "^1.4.3",
     "express": "^4.15.3",
