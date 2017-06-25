@@ -109,20 +109,27 @@ app.route("/graph/:graphName/run/").post(bodyParser.json(), async (request : any
     for (let key of Object.keys(request.body)) {
         _.set(graph,key, request.body[key]);
     }
-    await parseAndRun(plugins, graph, instanceName => {
-        return new Promise<any>((resolve, reject) => {
-            db.findOne<any>({ instanceName }, (err, doc) => {
-                if (err) {
-                    reject(err);
-                    return;
-                }
-                resolve(doc.data);
+    try {
+        await parseAndRun(plugins, graph, instanceName => {
+            return new Promise<any>((resolve, reject) => {
+                db.findOne<any>({ instanceName }, (err, doc) => {
+                    if (err) {
+                        reject(err);
+                        return;
+                    }
+                    resolve(doc.data);
+                });
             });
         });
-    });
-    response.json({
-        "success": true
-    });
+        response.json({
+            "success": true
+        });
+    }
+    catch (err) {
+        response.json({
+            "error": err.message
+        });
+    }
 });
 app.param('graphName', (req: any, res, next, graphName) => {
     db.findOne<any>({ graphName }, (err, doc) => {
