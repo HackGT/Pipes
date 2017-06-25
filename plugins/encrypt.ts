@@ -34,6 +34,10 @@ export function parse_language(verb: string, tokens: any[]) {
         text.push(token.text.content);
     }
 
+    if (text.length === 1 && text[0] === "it") {
+        text.pop();
+    }
+
     return {
         data: text.length === 0 ? null : text.join(" ")
     }
