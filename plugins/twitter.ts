@@ -17,10 +17,15 @@ export let requires = {
     access_token_secret: "string",
 };
 
-export let run = (requires: object, args: any): Promise<void> => {
+export let run = (requires: any, args: any): Promise<void> => {
     return new Promise<void>((resolve, reject) => {
         // do twitter stuff
-        let client = new Twitter(requires);
+        let client = new Twitter({
+            consumer_key: requires.consumer_key,
+            consumer_secret: requires.consumer_secret,
+            access_token_key: requires.access_token_key,
+            access_token_secret: requires.access_token_secret
+        });
 
         // post tweet
         client.post("statuses/update", {
