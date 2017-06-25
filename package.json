@@ -10,14 +10,17 @@
   "private": true,
   "dependencies": {
     "@google-cloud/translate": "^0.8.2",
+    "@types/slack-node": "^0.1.1",
     "body-parser": "^1.17.2",
     "compression": "^1.6.2",
     "cookie-parser": "^1.4.3",
+    "cors": "^2.8.3",
     "express": "^4.15.3",
     "lodash": "^4.17.4",
     "nedb": "^1.8.0",
     "nodemailer": "^4.0.1",
     "serve-static": "^1.12.3",
+    "slack-node": "^0.1.8",
     "twitter": "^1.7.1"
   },
   "devDependencies": {

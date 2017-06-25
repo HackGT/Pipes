@@ -6,6 +6,7 @@ import * as express from "express";
 import * as compression from "compression";
 import * as bodyParser from "body-parser";
 import * as _ from "lodash";
+import * as cors from "cors";
 // import * as cookieParser from "cookie-parser";
 import { parseAndRun } from "./runner"
 
@@ -20,6 +21,7 @@ let plugins: { [pluginName: string]: any } = {}
 
 export let app = express();
 app.use(compression());
+app.use(cors());
 // TODO: let cookieParserInstance = cookieParser(undefined, COOKIE_OPTIONS);
 // app.use(cookieParserInstance);
 
@@ -119,7 +121,14 @@ app.param('graphName', (req: any, res, next, graphName) => {
                 next(err);
                 return;
             }
-            req.graph = JSON.parse(doc.graph);
+            if (doc) {
+                req.graph = JSON.parse(doc.graph);
+            }
+            else {
+                res.status(404).json({
+                    "error": "Not found"
+                });
+            }
             next();
         });
 })
