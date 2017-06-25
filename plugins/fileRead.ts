@@ -12,7 +12,7 @@ export let requires = {}
 
 export let run = (requires: any, input: any) => {
     return new Promise<any>((resolve, reject) => {
-        fs.readFile(requires.filePath, "utf8", (err, data) => {
+        fs.readFile(input.filePath, "utf8", (err, data) => {
             if (err) {
                 reject(err);
                 return;
@@ -27,7 +27,7 @@ export let run = (requires: any, input: any) => {
 interface Inputs {
     filePath: string | null;
 }
-export function parse_langauge(verb: string, tokens: any[]): Inputs {
+export function parse_language(verb: string, tokens: any[]): Inputs {
     let text: string[] = [];
 
     for (let token of tokens) {
