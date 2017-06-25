@@ -57,6 +57,8 @@ function render(g: any) {
         if (!graph[key].plugin) {
             for (var j = 0; j < Object.keys(graph[key].output).length; j++) {
                 var split = graph[key]["output"][Object.keys(graph[key].output)[j]].split('.');
+
+                console.log(graph[key]);
                 nodeData.push({
                     id: idtrack,
                     label: graph[key][split[1]],

@@ -34,7 +34,7 @@ export async function text2graph(plugins: Plugins, text: string, getIntegration:
     // parse into the available verbs
     for (let i = 0; i < tokens.length; i += 1) {
         let token = tokens[i];
-        if (token.partOfSpeech.tag == "VERB" && verbs[token.text.content]) {
+        if (verbs[token.text.content]) {
             curr_verb = token.text.content;
             verb_split.push({
                 verb: curr_verb,
@@ -59,22 +59,22 @@ export async function text2graph(plugins: Plugins, text: string, getIntegration:
 
     for (let i = 0; i < verb_split.length; i += 1) {
         // take out conjunctions and other special cases
-        let window = verb_split[i];
-        let window_text = window.tokens;
+        let frame = verb_split[i];
+        let frame_text = frame.tokens;
         // take out a last 'then'
-        if (window_text[window_text.length - 1].text.content == "then") {
-            window_text.pop();
+        if (frame_text[frame_text.length - 1].text.content == "then") {
+            frame_text.pop();
         }
 
         // take out a last 'and'
-        if (window_text[window_text.length - 1].text.content == "and") {
-            window_text.pop();
+        if (frame_text[frame_text.length - 1].text.content == "and") {
+            frame_text.pop();
         }
 
         // give it to the right plugin
-        let plugin = plugins[verbs[window.verb]];
-        let parsed = plugin.parse_language(window.verb, window.tokens, window.index);
-        let step_id: string = `${verbs[window.verb]}-${i}`;
+        let plugin = plugins[verbs[frame.verb]];
+        let parsed = plugin.parse_language(frame.verb, frame.tokens, frame.index);
+        let step_id: string = `${verbs[frame.verb]}-${i}`;
         let inputs_covered: {[f: string]: boolean} = {};
 
         for (let input of Object.keys(parsed)) {
@@ -98,7 +98,7 @@ export async function text2graph(plugins: Plugins, text: string, getIntegration:
             if (!inputs_covered[input]) {
                 if (last_plugin < 0) {
                     console.error("Could not find output to get data from!",
-                                  input, verbs[window.verb]);
+                                  input, verbs[frame.verb]);
                     return null;
                 }
                 console.log(input, "not covered! getting it from last output");
@@ -113,8 +113,8 @@ export async function text2graph(plugins: Plugins, text: string, getIntegration:
         last_plugin = commands.length;
         commands.push({
             [step_id]: {
-                plugin: verbs[window.verb],
-                instance: await getIntegration(verbs[window.verb]),
+                plugin: verbs[frame.verb],
+                instance: await getIntegration(verbs[frame.verb]),
                 output: {},
             },
         });

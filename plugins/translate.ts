@@ -30,7 +30,8 @@ export let run = (requires: any, input: any) => {
             projectId: projectId,
             key: requires.api_key
         });
-        translateClient.translate(input.text, input.language)
+        let language = languages.long_to_short[input.language];
+        translateClient.translate(input.text, language)
         .then((results: any) => {
             const translation = results[0];
             resolve({ "translated": translation });
@@ -56,7 +57,7 @@ export function parse_language(verb: string, tokens: any[]): Inputs {
     for (let i = 0; i < tokens.length; i += 1) {
         if (languages.long_to_short[tokens[i].text.content]) {
             // we found the language
-            language = languages.long_to_short[tokens[i].text.content];
+            language = tokens[i].text.content;
 
             // commonly the word before is a desc. prep.
             if (tokens[i - 1] && tokens[i - 1].partOfSpeech.tag === "ADP") {
