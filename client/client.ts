@@ -15,7 +15,6 @@ let graphInput = document.getElementById("graphInput") as HTMLInputElement;
 let lastKeyFrame = new Date().valueOf();
 
 document.addEventListener("keydown", e => {
-    console.log("keydown");
     graphInput.focus();
 }, false);
 
@@ -34,9 +33,16 @@ graphInput.addEventListener("input", e => {
         method: "POST",
         body: JSON.stringify({text: graphInput.value}),
         headers: myHeaders
-    }).then(res => res.json()).then((res: any) => {
+    })
+    .then(res => res.json())
+    .then(res => {
         render(res.graph);
         currentGraph = res.graph;
+    })
+    .catch(e => {
+        console.error(e);
+        var editor_child = document.getElementById("editor").children[0];
+        editor_child.parentNode.removeChild(editor_child);
     });
 });
 let executeButton = document.getElementById("submitButton") as HTMLButtonElement;
@@ -64,7 +70,6 @@ function render(g: any) {
             for (var j = 0; j < Object.keys(graph[key].output).length; j++) {
                 var split = graph[key]["output"][Object.keys(graph[key].output)[j]].split('.');
 
-                console.log(graph[key]);
                 nodeData.push({
                     id: idtrack,
                     label: graph[key][split[1]],

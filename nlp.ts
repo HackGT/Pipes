@@ -58,17 +58,21 @@ export async function text2graph(plugins: Plugins, text: string, getIntegration:
     let last_plugin = -1;
 
     for (let i = 0; i < verb_split.length; i += 1) {
-        // take out conjunctions and other special cases
         let frame = verb_split[i];
-        let frame_text = frame.tokens;
-        // take out a last 'then'
-        if (frame_text[frame_text.length - 1].text.content == "then") {
-            frame_text.pop();
-        }
 
-        // take out a last 'and'
-        if (frame_text[frame_text.length - 1].text.content == "and") {
-            frame_text.pop();
+        // take out conjunctions and other special cases
+        // check that this isn't the last part
+        if (i + 1 < verb_split.length) {
+            let frame_text = frame.tokens;
+            // take out a last 'then'
+            if (frame_text[frame_text.length - 1].text.content == "then") {
+                frame_text.pop();
+            }
+
+            // take out a last 'and'
+            if (frame_text[frame_text.length - 1].text.content == "and") {
+                frame_text.pop();
+            }
         }
 
         // give it to the right plugin
