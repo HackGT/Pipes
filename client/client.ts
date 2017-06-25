@@ -14,18 +14,20 @@ if (loc.searchParams.get("graph")) {
 let graphInput = document.getElementById("graphInput") as HTMLInputElement;
 let lastKeyFrame = new Date().valueOf();
 const DEBOUNCE_INTERVAL = 50; // ms
-graphInput.addEventListener("onkeyup", e => {
+graphInput.addEventListener("keyup", e => {
     if (new Date().valueOf() - lastKeyFrame < DEBOUNCE_INTERVAL) {
         return;
     }
     lastKeyFrame = new Date().valueOf();
     
-    let body = new FormData();
-    body.append("text", graphInput.value);
+
+    var myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
     fetch(`http://localhost:3000/nlp`, {
         credentials: "same-origin",
-        method: "PUT",
-        body
+        method: "POST",
+        body: JSON.stringify({text: graphInput.value}),
+        headers: myHeaders
     }).then(res => res.json()).then(res => {
         render(res.graph);
         currentGraph = res.graph;
@@ -33,10 +35,20 @@ graphInput.addEventListener("onkeyup", e => {
 });
 let executeButton = document.getElementById("submitButton") as HTMLButtonElement;
 executeButton.addEventListener("click", e => {
-
+    var myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+     fetch(`http://localhost:3000/run`, {
+        credentials: "same-origin",
+        method: "POST",
+        body: JSON.stringify(currentGraph),
+        headers: myHeaders
+    }).then(res => res.json()).then(res => {
+        alert("Successfully sent command");
+    });
 });
 
-function render(graph: any) {
+function render(g: any) {
+    let graph = JSON.parse(JSON.stringify(g));
     var colors = ["#6EAC29", "#F9A11B", "#60C5BA", "#f26d5b", "#A593E0"];
     var nodeData = [];
     var idtrack = 0;

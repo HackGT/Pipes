@@ -200,17 +200,6 @@ app.route("/nlp/").post(bodyParser.json(), async (request : any, response) => {
                 })
             })
         } )
-        await parseAndRun(plugins, graph!, (instanceName : string) => {
-            return new Promise<any>((resolve, reject) => {
-                db.findOne<any>({ instanceName }, (err, doc) => {
-                    if (err) {
-                        reject(err);
-                        return;
-                    }
-                    resolve(doc.data);
-                });
-            });
-        });
         response.json({
             "success": true,
             "graph": graph!
