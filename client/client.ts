@@ -4,7 +4,7 @@ let currentGraph: any;
 
 var loc = new URL(window.location.toString()) as any;
 if (loc.searchParams.get("graph")) {
-    fetch(`http://localhost:3000/graph/${loc.searchParams.get("graph")}/`).then(res => res.json()).then(graph => {
+    fetch(`/graph/${loc.searchParams.get("graph")}/`).then(res => res.json()).then(graph => {
         render(graph);
         currentGraph = graph;
     });
@@ -28,7 +28,7 @@ graphInput.addEventListener("input", e => {
 
     var myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
-    fetch(`http://localhost:3000/nlp`, {
+    fetch(`/nlp`, {
         credentials: "same-origin",
         method: "POST",
         body: JSON.stringify({text: graphInput.value}),
@@ -49,7 +49,7 @@ let executeButton = document.getElementById("submitButton") as HTMLButtonElement
 executeButton.addEventListener("click", e => {
     var myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
-     fetch(`http://localhost:3000/run`, {
+     fetch(`/run`, {
         credentials: "same-origin",
         method: "POST",
         body: JSON.stringify(currentGraph),

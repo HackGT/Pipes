@@ -15,7 +15,7 @@ import { text2graph } from "./nlp"
 import * as Datastore from "nedb";
 const db = new Datastore({ filename: "db.db", autoload: true });
 
-const PORT = 3000;
+const PORT = 6789;
 let plugins: { [pluginName: string]: any } = {}
 // let secrets: {
 //     [service: string]: any
@@ -24,6 +24,8 @@ let plugins: { [pluginName: string]: any } = {}
 export let app = express();
 app.use(compression());
 app.use(cors());
+
+app.use('/', express.static(path.join(__dirname, 'client')));
 // TODO: let cookieParserInstance = cookieParser(undefined, COOKIE_OPTIONS);
 // app.use(cookieParserInstance);
 
