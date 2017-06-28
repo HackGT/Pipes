@@ -73,3 +73,5 @@ client/client\.js
 runner.js
 
 nlp\.js
+
+test\.js
