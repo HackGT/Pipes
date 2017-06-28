@@ -19,8 +19,11 @@ export class Encrypt extends TransformPlugin {
 	private iv: Buffer | null = null;
 	private salt: Buffer | null = null;
 
-	constructor() {
+	constructor(password: string) {
 		super();
+		this.setPassword(password).catch(err => {
+			throw err;
+		});
 	}
 
 	public setPassword(password: string): Promise<void> {
@@ -68,6 +71,7 @@ export class Encrypt extends TransformPlugin {
 			"encrypted": JSON.stringify({
 				"authTag": cipher.getAuthTag().toString("hex"),
 				"iv": this.iv.toString("hex"),
+				"salt": this.salt.toString("hex"),
 				"encrypted": encrypted
 			})
 		};
