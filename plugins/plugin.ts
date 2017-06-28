@@ -3,9 +3,7 @@ import { Readable, Duplex, Transform, DuplexOptions } from "stream";
 interface RootPlugin {
 	name: string;
 	verbs: string[];
-	inputs: string[];
-	outputs: string[];
-	parseLanguage(verb: string, tokens: any[]): Object;
+	parseLanguage(verb: string, tokens: any[]): any;
 }
 
 const commonOptions: DuplexOptions = {
@@ -21,9 +19,8 @@ export function nameOf<T, K extends keyof T>(_: T, key: K) {
 export abstract class InputPlugin extends Readable implements RootPlugin {
 	public abstract name: string;
 	public abstract verbs: string[];
-	public abstract inputs: string[];
 	public abstract outputs: string[];
-	public abstract parseLanguage(verb: string, tokens: any[]): Object;
+	public abstract parseLanguage(verb: string, tokens: any[]): any;
 	
 	constructor() {
 		super(commonOptions);
@@ -34,10 +31,7 @@ export abstract class OutputPlugin extends Duplex implements RootPlugin {
 	public abstract name: string;
 	public abstract verbs: string[];
 	public abstract inputs: string[];
-	public abstract outputs: string[];
-	public abstract parseLanguage(verb: string, tokens: any[]): Object;
-
-	private buffer: any[] = [];
+	public abstract parseLanguage(verb: string, tokens: any[]): any;
 
 	constructor() {
 		super(commonOptions);
@@ -46,17 +40,11 @@ export abstract class OutputPlugin extends Duplex implements RootPlugin {
 	// Automaticaly implement ability to directly pass input to output
 	// NOTE: super._write() and super._read() must be called from child classes for this to work
 	public _write(chunk: any, encoding: string, callback: Function): void {
-		this.buffer.push(chunk);
+		this.push(chunk);
 		// callback() must be called by inheriting class
 	}
-	public _read(size: number): void {
-		while (true) {
-			let value = this.buffer.shift();
-			if (value === undefined) {
-				break;
-			}
-			this.push(value);
-		}
+	public _read(size: number) {
+
 	}
 }
 
@@ -65,13 +53,13 @@ export abstract class TransformPlugin extends Transform implements RootPlugin {
 	public abstract verbs: string[];
 	public abstract inputs: string[];
 	public abstract outputs: string[];
-	public abstract parseLanguage(verb: string, tokens: any[]): Object;
+	public abstract parseLanguage(verb: string, tokens: any[]): any;
 
 	constructor() {
 		super(commonOptions);
 	}
 }
 
-export class ZipHelper extends Transform implements RootPlugin {
+// export class ZipHelper extends Transform implements RootPlugin {
 	
-}
+// }

@@ -19,11 +19,8 @@ export class Encrypt extends TransformPlugin {
 	private iv: Buffer | null = null;
 	private salt: Buffer | null = null;
 
-	constructor(password: string) {
+	constructor(private rawPassword: string) {
 		super();
-		this.setPassword(password).catch(err => {
-			throw err;
-		});
 	}
 
 	public setPassword(password: string): Promise<void> {
@@ -56,11 +53,8 @@ export class Encrypt extends TransformPlugin {
 		}
 	}
 
-	public _transform(chunk: Input, encoding: string, callback: Function): void {
-		if (!this.password || !this.salt) {
-			callback(new Error("Cipher password not initialized. Call setPassword() first."));
-			return;
-		}
+	public async _transform(chunk: Input, encoding: string, callback: Function) {
+		await this.setPassword(this.rawPassword);
 
 		this.iv = crypto.randomBytes(16);
 		let cipher = crypto.createCipheriv("id-aes256-GCM", this.password, this.iv);
@@ -71,7 +65,7 @@ export class Encrypt extends TransformPlugin {
 			"encrypted": JSON.stringify({
 				"authTag": cipher.getAuthTag().toString("hex"),
 				"iv": this.iv.toString("hex"),
-				"salt": this.salt.toString("hex"),
+				"salt": this.salt!.toString("hex"),
 				"encrypted": encrypted
 			})
 		};
