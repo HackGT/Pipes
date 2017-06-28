@@ -1,0 +1,39 @@
+{
+    "nodes": {
+        "input_1": {
+            "type": "Static",
+            "data": "Hello, world!"
+        },
+        "encrypt_1": {
+            "type": "Encrypt",
+            "password": "gatech"
+        },
+        "decrypt_1": {
+            "type": "Decrypt",
+            "password": "gatech"
+        },
+        "log_1": {
+            "type": "Console"
+        }
+    },
+    "connections": [
+        {
+            "from": "input_1", "to": "encrypt_1",
+            "mapping": {
+                "data": "data"
+            }
+        },
+        {
+            "from": "encrypt_1", "to": "decrypt_1",
+            "mapping": {
+                "encrypted": "encrypted"
+            }
+        },
+        {
+            "from": "decrypt_1", "to": "log_1",
+            "mapping": {
+                "encrypted": "data"
+            }
+        }
+    ]
+}

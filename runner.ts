@@ -53,7 +53,7 @@ export async function parseAndRun(plugins: {[field: string]: any}, parsedRequest
             let result = await plugins[node.plugin].run(required, node);
 
             // assign the outputs from the result
-            console.log("Assignig Outputs", nodeName);
+            console.log("Assigning Outputs", nodeName);
             if (!result) {
                 return;
             }
