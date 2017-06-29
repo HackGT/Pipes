@@ -7,7 +7,7 @@ import { InputPlugin, TransformPlugin, OutputPlugin, Mapper } from "./plugins/pl
 type AnyPlugin = (typeof InputPlugin | typeof TransformPlugin | typeof OutputPlugin) & {
     new(config: Object): InputPlugin | TransformPlugin | OutputPlugin   
 };
-type Chain = (InputPlugin | TransformPlugin | OutputPlugin | Mapper)[];
+type Pipeline = (InputPlugin | TransformPlugin | OutputPlugin | Mapper)[];
 
 interface InputFormat {
     nodes: {
@@ -46,8 +46,8 @@ export async function loadPlugins(dir: string = "plugins") {
     }
 }
 
-export async function parse(input: InputFormat): Promise<Chain> {
-    let chain: Chain = [];
+export async function parse(input: InputFormat): Promise<Pipeline> {
+    let pipeline: Pipeline = [];
 
     let froms: string[] = [];
     let tos: string[] = [];
@@ -63,8 +63,8 @@ export async function parse(input: InputFormat): Promise<Chain> {
     }
     function addToChain(fromName: string, toName: string, mapping: { [mapping: string]: string }): void {
         let instance = plugins[input.nodes[fromName].type];
-        chain.push(new instance(input.nodes[fromName]));
-        chain.push(new Mapper(mapping));
+        pipeline.push(new instance(input.nodes[fromName]));
+        pipeline.push(new Mapper(mapping));
         resolvedTos.push(toName);
     }
 
@@ -83,16 +83,16 @@ export async function parse(input: InputFormat): Promise<Chain> {
         
         if (froms.indexOf(connection.to) === -1) {
             let instance = plugins[input.nodes[connection.to].type];
-            chain.push(new instance(input.nodes[connection.to]));
+            pipeline.push(new instance(input.nodes[connection.to]));
             console.log(`Added ${connection.to} (output with dependencies resolved)`)
         }
     }
-    return chain;
+    return pipeline;
 }
 
-async function execute(chain: Chain) {
-    for (let i = 0; i < chain.length - 1; i++) {
-        chain[i].pipe(chain[i + 1] as Writable);
+async function execute(pipeline: Pipeline) {
+    for (let i = 0; i < pipeline.length - 1; i++) {
+        pipeline[i].pipe(pipeline[i + 1] as Writable);
     }
 }
 
