@@ -5,14 +5,16 @@ interface Output {
 }
 
 export class Static extends InputPlugin {
-	public static readonly pluginName: string = "Static";
 	public static readonly verbs: string[] = [];
 	
 	public static readonly outputs: (keyof Output)[] = ["data"];
 
-	constructor(private data: string) {
+	private readonly data: string;
+
+	constructor(config: { data: string }) {
 		super();
 
+		this.data = config.data;
 		let output: Output = {
 			data: this.data
 		};

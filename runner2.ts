@@ -3,7 +3,10 @@ import * as path from "path";
 import * as util from "util";
 import { InputPlugin, TransformPlugin, OutputPlugin } from "./plugins/plugin";
 
-type AnyPlugin = InputPlugin | TransformPlugin | OutputPlugin;
+type AnyPlugin = (typeof InputPlugin | typeof TransformPlugin | typeof OutputPlugin) & {
+    new(config: Object): InputPlugin | TransformPlugin | OutputPlugin   
+};
+
 interface InputFormat {
     nodes: {
         [nodeName: string]: {
@@ -29,10 +32,10 @@ export async function loadPlugins(dir: string = "plugins") {
             try {
                 let imported = await import(path.join(__dirname, dir, path.basename(file, ".js")));
                 // Plugins only export one thing
-                let plugin = imported[Object.keys(imported)[0]];
+                let plugin = imported[Object.keys(imported)[0]] as AnyPlugin;
 
-                plugins[plugin.pluginName] = plugin;
-                console.log(`Loaded plugin: ${plugin.pluginName} from ${file}`);
+                plugins[plugin.name] = plugin;
+                console.log(`Loaded plugin: ${plugin.name} from ${file}`);
             }
             catch (err) {
                 console.warn(`Could not load plugin from ${file}: ${err.message}`);
@@ -53,12 +56,21 @@ export async function parseAndExecute(input: InputFormat) {
     }
     for (let from of froms) {
         if (tos.indexOf(from) === -1) {
-            // This node has no input dependencies and should therefore begin our chain"
-            chain.push(plugins[input.nodes[from].type]);
+            // This node has no input dependencies and should therefore begin our chain
+            let instance = plugins[input.nodes[from].type];
+            chain.push(new instance(input.nodes[from]));
         }
     }
 }
 
-export async function test() {
-    loadPlugins();
+async function test() {
+    await loadPlugins();
+    await parseAndExecute(
+        JSON.parse(
+            fs.readFileSync(
+                path.join(__dirname, "graph_examples", "cryptography-proposed.json")
+            , "utf8")
+        )
+    );
 }
+test();

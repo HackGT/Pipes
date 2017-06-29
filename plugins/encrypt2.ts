@@ -9,7 +9,6 @@ interface Output {
 }
 
 export class Encrypt extends TransformPlugin {
-	public static readonly pluginName: string = "Encrypt";
 	public static readonly verbs: string[] = ["encrypt"];
 	
 	public static readonly inputs: (keyof Input)[] = ["data"];
@@ -18,9 +17,11 @@ export class Encrypt extends TransformPlugin {
 	private password: Buffer | null = null;
 	private iv: Buffer | null = null;
 	private salt: Buffer | null = null;
+	private readonly rawPassword: string;
 
-	constructor(private rawPassword: string) {
+	constructor(config: { password: string }) {
 		super();
+		this.rawPassword = config.password;
 	}
 
 	public setPassword(password: string): Promise<void> {

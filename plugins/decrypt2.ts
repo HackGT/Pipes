@@ -9,14 +9,16 @@ interface Output {
 }
 
 export class Decrypt extends TransformPlugin {
-	public static readonly pluginName: string = "Decrypt";
 	public static readonly verbs: string[] = ["decrypt"];
 	
 	public static readonly inputs: (keyof Input)[] = ["encrypted"];
 	public static readonly outputs: (keyof Output)[] = ["data"];
 
-	constructor(private password: string) {
+	private readonly password: string;
+
+	constructor(config: { password: string }) {
 		super();
+		this.password = config.password;
 	}
 
 	private derivePassword(salt: Buffer): Promise<Buffer> {

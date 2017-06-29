@@ -15,7 +15,6 @@ export function nameOf<T, K extends keyof T>(_: T, key: K) {
 }
 
 export abstract class InputPlugin extends Readable implements RootPlugin {
-	public static readonly pluginName: string;
 	public static readonly verbs: string[];
 	public static readonly outputs: string[];
 	public abstract parseLanguage(verb: string, tokens: any[]): any;
@@ -26,7 +25,6 @@ export abstract class InputPlugin extends Readable implements RootPlugin {
 }
 
 export abstract class OutputPlugin extends Duplex implements RootPlugin {
-	public static readonly pluginName: string;
 	public static readonly verbs: string[];
 	public static readonly inputs: string[];
 	public abstract parseLanguage(verb: string, tokens: any[]): any;
@@ -47,7 +45,6 @@ export abstract class OutputPlugin extends Duplex implements RootPlugin {
 }
 
 export abstract class TransformPlugin extends Transform implements RootPlugin {
-	public static readonly pluginName: string;
 	public static readonly verbs: string[];
 	public static readonly inputs: string[];
 	public static readonly outputs: string[];
