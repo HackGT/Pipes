@@ -1,8 +1,6 @@
 import { Readable, Duplex, Transform, DuplexOptions } from "stream";
 
 interface RootPlugin {
-	name: string;
-	verbs: string[];
 	parseLanguage(verb: string, tokens: any[]): any;
 }
 
@@ -17,9 +15,9 @@ export function nameOf<T, K extends keyof T>(_: T, key: K) {
 }
 
 export abstract class InputPlugin extends Readable implements RootPlugin {
-	public abstract name: string;
-	public abstract verbs: string[];
-	public abstract outputs: string[];
+	public static readonly pluginName: string;
+	public static readonly verbs: string[];
+	public static readonly outputs: string[];
 	public abstract parseLanguage(verb: string, tokens: any[]): any;
 	
 	constructor() {
@@ -28,9 +26,9 @@ export abstract class InputPlugin extends Readable implements RootPlugin {
 }
 
 export abstract class OutputPlugin extends Duplex implements RootPlugin {
-	public abstract name: string;
-	public abstract verbs: string[];
-	public abstract inputs: string[];
+	public static readonly pluginName: string;
+	public static readonly verbs: string[];
+	public static readonly inputs: string[];
 	public abstract parseLanguage(verb: string, tokens: any[]): any;
 
 	constructor() {
@@ -49,10 +47,10 @@ export abstract class OutputPlugin extends Duplex implements RootPlugin {
 }
 
 export abstract class TransformPlugin extends Transform implements RootPlugin {
-	public abstract name: string;
-	public abstract verbs: string[];
-	public abstract inputs: string[];
-	public abstract outputs: string[];
+	public static readonly pluginName: string;
+	public static readonly verbs: string[];
+	public static readonly inputs: string[];
+	public static readonly outputs: string[];
 	public abstract parseLanguage(verb: string, tokens: any[]): any;
 
 	constructor() {

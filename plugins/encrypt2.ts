@@ -9,11 +9,11 @@ interface Output {
 }
 
 export class Encrypt extends TransformPlugin {
-	public name: string = "Encrypt";
-	public verbs: string[] = ["encrypt"];
+	public static readonly pluginName: string = "Encrypt";
+	public static readonly verbs: string[] = ["encrypt"];
 	
-	public inputs: (keyof Input)[] = ["data"];
-	public outputs: (keyof Output)[] = ["encrypted"];
+	public static readonly inputs: (keyof Input)[] = ["data"];
+	public static readonly outputs: (keyof Output)[] = ["encrypted"];
 
 	private password: Buffer | null = null;
 	private iv: Buffer | null = null;

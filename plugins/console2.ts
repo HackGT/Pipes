@@ -5,10 +5,10 @@ interface Input {
 }
 
 export class Console extends OutputPlugin {
-	public name: string = "Console Print";
-	public verbs: string[] = ["print", "log"];
+	public static readonly pluginName: string = "Console Print";
+	public static readonly verbs: string[] = ["print", "log"];
 	
-	public inputs: (keyof Input)[] = ["data"];
+	public static readonly inputs: (keyof Input)[] = ["data"];
 
 	constructor() {
 		super();

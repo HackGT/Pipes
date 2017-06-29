@@ -5,10 +5,10 @@ interface Output {
 }
 
 export class Static extends InputPlugin {
-	public name: string = "Static";
-	public verbs: string[] = [];
+	public static readonly pluginName: string = "Static";
+	public static readonly verbs: string[] = [];
 	
-	public outputs: (keyof Output)[] = ["data"];
+	public static readonly outputs: (keyof Output)[] = ["data"];
 
 	constructor(private data: string) {
 		super();
