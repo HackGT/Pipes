@@ -55,6 +55,19 @@ export abstract class TransformPlugin extends Transform implements RootPlugin {
 	}
 }
 
-// export class ZipHelper extends Transform implements RootPlugin {
-	
-// }
+export class Mapper extends Transform {
+	constructor(private mapping: { [mapping: string]: string }) {
+		super(commonOptions)
+	}
+
+	public _transform(chunk: any, encoding: string, callback: Function): void {
+		let remapped: any = {};
+		for (let key of Object.keys(chunk)) {
+			if (this.mapping[key]) {
+				remapped[this.mapping[key]] = chunk[key];
+			}
+		}
+		this.push(remapped);
+		callback();
+	}
+}

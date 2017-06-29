@@ -32,7 +32,7 @@
         {
             "from": "decrypt_1", "to": "log_1",
             "mapping": {
-                "encrypted": "data"
+                "data": "data"
             }
         }
     ]
