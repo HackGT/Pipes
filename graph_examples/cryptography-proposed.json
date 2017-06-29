@@ -14,6 +14,9 @@
         },
         "log_1": {
             "type": "Console"
+        },
+        "log_2": {
+            "type": "Console"
         }
     },
     "connections": [
@@ -24,13 +27,19 @@
             }
         },
         {
-            "from": "encrypt_1", "to": "decrypt_1",
+            "from": "encrypt_1", "to": "log_1",
             "mapping": {
-                "encrypted": "encrypted"
+                "encrypted": "data"
             }
         },
         {
-            "from": "decrypt_1", "to": "log_1",
+            "from": "log_1", "to": "decrypt_1",
+            "mapping": {
+                "data": "encrypted"
+            }
+        },
+        {
+            "from": "decrypt_1", "to": "log_2",
             "mapping": {
                 "data": "data"
             }
