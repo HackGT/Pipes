@@ -1,13 +1,19 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as util from "util";
-import { Writable } from "stream";
-import { InputPlugin, TransformPlugin, OutputPlugin, Mapper } from "./plugins/plugin";
+import { InputPlugin, TransformPlugin, OutputPlugin, Mapper, MultiPipe } from "./plugins/plugin";
 
 type AnyPlugin = (typeof InputPlugin | typeof TransformPlugin | typeof OutputPlugin) & {
     new(config: Object): InputPlugin | TransformPlugin | OutputPlugin   
 };
-type Pipeline = (InputPlugin | TransformPlugin | OutputPlugin | Mapper)[];
+type Node = (InputPlugin | TransformPlugin | OutputPlugin | Mapper);
+type Pipeline = {
+    [name: string]: {
+        node: Mapper | OutputPlugin;
+        rawNode: Node;
+        pipedTo: string[];
+    }
+};
 
 interface InputFormat {
     nodes: {
@@ -47,74 +53,64 @@ export async function loadPlugins(dir: string = "plugins") {
 }
 
 export async function parse(input: InputFormat): Promise<Pipeline> {
-    let pipeline: Pipeline = [];
+    let pipeline: Pipeline = {};
 
     let froms: string[] = [];
     let tos: string[] = [];
     let resolvedTos: string[] = [];
-    let addedNodes: string[] = [];
-    let allNodes = new Set<string>();
 
     for (let connection of input.connections) {
         froms.push(connection.from);
         tos.push(connection.to);
     }
 
-    function occurances<T>(arr: T[], search: T): number {
-        return arr.filter(val => val === search).length;
-    }
     function addToChain(fromName: string, toName: string, mapping: { [mapping: string]: string }): void {
-        addedNodes.push(fromName);
 
-        let instance = plugins[input.nodes[fromName].type];
-        pipeline.push(new instance(input.nodes[fromName]));
-        pipeline.push(new Mapper(mapping));
+        if (pipeline[fromName] === undefined) {
+            let plugin = plugins[input.nodes[fromName].type];
+            let instance = new plugin(input.nodes[fromName]);
+            pipeline[fromName] = {
+                "node": instance.pipe(new Mapper(mapping, fromName)),
+                "rawNode": instance,
+                "pipedTo": [toName]
+            };
+            console.log(`Mapping for ${fromName} is ${JSON.stringify(mapping)}`);
+        }
+        else {
+            pipeline[fromName].pipedTo.push(toName);
+        }
         resolvedTos.push(toName);
     }
 
-    const MAX_DEPTH = 50;
-    let depth = 0;
-    while (true) {
-        for (let i = 0; i < input.connections.length; i++) {
-            let connection = input.connections[i];
-            allNodes.add(connection.from).add(connection.to);
+    for (let connection of input.connections) {
+        addToChain(connection.from, connection.to, connection.mapping);
+        console.log(`Add node: ${connection.from}`);
 
-            if (tos.indexOf(connection.from) === -1 && addedNodes.indexOf(connection.from) === -1) {
-                // This node has no input dependencies and should therefore begin our chain
-                console.log(`Added ${connection.from} (no dependencies)`)
-                addToChain(connection.from, connection.to, connection.mapping);
-            }
-            // Check if dependencies are satisfied
-            // Finished if # of resolved tos = # of total tos of that node name
-            else if (occurances(resolvedTos, connection.from) === occurances(tos, connection.from) && addedNodes.indexOf(connection.from) === -1) {
-                addToChain(connection.from, connection.to, connection.mapping);
-                console.log(`Added ${connection.from} (all dependencies resolved)`)
-            }
+        if (froms.indexOf(connection.to) === -1) {
+            let plugin = plugins[input.nodes[connection.to].type];
+            let instance = new plugin(input.nodes[connection.to]) as OutputPlugin;
+            pipeline[connection.to] = {
+                "node": instance,
+                "rawNode": instance,
+                "pipedTo": []
+            };
+            console.log(`Add terminating node: ${connection.to}`);
         }
-        // Restart until there are no more pending dependencies
-        if (depth++ >= MAX_DEPTH) {
-            console.warn(`Maximum depth of ${MAX_DEPTH} exceeded`);
-            return [];
-        }
-        if (allNodes.size - 1 === pipeline.length / 2) {
-            for (let connection of input.connections) {
-                if (froms.indexOf(connection.to) === -1 && addedNodes.indexOf(connection.to) === -1) {
-                    addedNodes.push(connection.to);
-
-                    let instance = plugins[input.nodes[connection.to].type];
-                    pipeline.push(new instance(input.nodes[connection.to]));
-                    console.log(`Added ${connection.to} (output with dependencies resolved)`)
-                }
-            }
-            return pipeline;
-        }
-        console.log("Restarted loop to reevaluate dependencies");
     }
+
+    return pipeline;
 }
 
 async function execute(pipeline: Pipeline) {
-    for (let i = 0; i < pipeline.length - 1; i++) {
-        pipeline[i].pipe(pipeline[i + 1] as Writable);
+    for (let nodeName of Object.keys(pipeline)) {
+        let pipelineObject = pipeline[nodeName];
+        let node = pipelineObject.node;
+
+        if (pipelineObject.pipedTo.length > 0) {
+            let pipedNodes = pipelineObject.pipedTo.map(pipedNodeName => pipeline[pipedNodeName].rawNode) as (TransformPlugin | OutputPlugin)[];
+            node.pipe(new MultiPipe(pipedNodes));
+            console.log(`Piping ${nodeName} to ${pipelineObject.pipedTo.join(", ")}`);
+        }
     }
 }
 

@@ -17,6 +17,9 @@
         },
         "log_2": {
             "type": "Console"
+        },
+        "log_3": {
+            "type": "Console"
         }
     },
     "connections": [
@@ -40,6 +43,12 @@
         },
         {
             "from": "decrypt_1", "to": "log_2",
+            "mapping": {
+                "data": "data"
+            }
+        },
+        {
+            "from": "input_1", "to": "log_3",
             "mapping": {
                 "data": "data"
             }

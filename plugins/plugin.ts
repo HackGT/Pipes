@@ -1,4 +1,4 @@
-import { Readable, Duplex, Transform, DuplexOptions } from "stream";
+import { Readable, Writable, Duplex, Transform, DuplexOptions } from "stream";
 
 interface RootPlugin {
 	parseLanguage(verb: string, tokens: any[]): any;
@@ -56,8 +56,9 @@ export abstract class TransformPlugin extends Transform implements RootPlugin {
 }
 
 export class Mapper extends Transform {
-	constructor(private mapping: { [mapping: string]: string }) {
-		super(commonOptions)
+	constructor(private mapping: { [mapping: string]: string }, private sourceNodeName: string) {
+		super(commonOptions);
+		this.sourceNodeName;
 	}
 
 	public _transform(chunk: any, encoding: string, callback: Function): void {
@@ -66,8 +67,24 @@ export class Mapper extends Transform {
 			if (this.mapping[key]) {
 				remapped[this.mapping[key]] = chunk[key];
 			}
+			else {
+				console.warn(`Remapping for key '${key}' wasn't found. Key will be dropped.`);
+			}
 		}
 		this.push(remapped);
+		callback();
+	}
+}
+
+export class MultiPipe extends Writable {
+	constructor(private outputs: (TransformPlugin | OutputPlugin)[]) {
+		super(commonOptions);
+	}
+
+	public _write(chunk: any, encoding: string, callback: Function): void {
+		for (let output of this.outputs) {
+			output.write(chunk);
+		}
 		callback();
 	}
 }
