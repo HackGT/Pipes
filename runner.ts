@@ -1,151 +1,115 @@
-export interface InputFormat {
-    [nodeName: string]: {
-        instance?: string;
-        plugin?: string;
-        output: {
-            [nodeAndValue: string]: string;
-        };
-        [otherField: string]: any;
-    }
-}
+import * as fs from "fs";
+import * as path from "path";
+import * as util from "util";
+import { InputPlugin, TransformPlugin, OutputPlugin, Mapper, MultiPipe } from "./plugins/plugin";
 
-const maxDepth = 100;
-
-export async function parseAndRun(plugins: {[field: string]: any}, parsedRequest: InputFormat, dbDataCb: (instanceName: string) => Promise<any>): Promise<void> {
-    let completed: {[node: string]: boolean} = {};
-
-    function isReady(nodeName: string): boolean {
-        if (completed[nodeName]) {
-            return false;
-        }
-        if (parsedRequest[nodeName].plugin) {
-            let inputs = plugins[parsedRequest[nodeName].plugin!].inputs;
-            for (let input of Object.keys(inputs)) {
-                if (!parsedRequest[nodeName][input]) {
-                    return false;
-                }
-            }
-            return true;
-        }
-        for (let outputKey of Object.keys(parsedRequest[nodeName].output)) {
-            let outputValue = parsedRequest[nodeName].output[outputKey];
-            let [mod, key] = outputValue.split(".");
-
-            if (!parsedRequest[mod][key]) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    async function traverse(nodeName: string) {
-        let node = parsedRequest[nodeName];
-
-        if (node.plugin) {
-            // get the setup stuff
-            let required;
-            if (node.instance) {
-                required = await dbDataCb(node.instance);
-            }
-
-            // run the plugin
-            console.log("Running", nodeName);
-            let result = await plugins[node.plugin].run(required, node);
-
-            // assign the outputs from the result
-            console.log("Assigning Outputs", nodeName);
-            if (!result) {
-                return;
-            }
-            for (let resultKey of Object.keys(result)) {
-                parsedRequest[nodeName][resultKey] = result[resultKey];
-            }
-        }
-
-        // assign any of the outputs that have to do with this plugin
-        for (let output of Object.keys(node.output)) {
-            let [mod, key] = output.split(".");
-            let [rmod, rkey] = node.output[output].split(".");
-
-            parsedRequest[mod][key] = parsedRequest[rmod][rkey];
-        }
-    }
-
-    let containsIncomplete: boolean = true;
-
-    let depth = 0;
-    while (containsIncomplete) {
-        containsIncomplete = false;
-        for (let nodeName of Object.keys(parsedRequest)) {
-            console.log("On module", nodeName);
-            if (!isReady(nodeName)) {
-                console.log("Not ready", nodeName);
-                containsIncomplete = true;
-                continue;
-            }
-            console.log("Ready", nodeName);
-            await traverse(nodeName);
-            console.log("Complete", nodeName);
-            completed[nodeName] = true;
-        }
-        if (depth++ > maxDepth) {
-            console.error(`Max depth of ${maxDepth} exceeded!`);
-            break;
-        }
-    }
-}
-
-const TEST_JSON: any = {
-    "text": {
-        "value": "this is a test of the Georgia Tech emergency notification system",
-        "language": "es",
-        "output": {
-            "translate_1.text": "text.value",
-            "translate_1.language": "text.language"
-        }
-    },
-    "translate_1": {
-        "instance": "Translate 1",
-        "plugin": "translate",
-        "output": {
-            "twitter_1.tweet":  "translate_1.translated"
-        }
-    },
-    "twitter_1": {
-        "instance": "hackgt twitter",
-        "plugin": "twitter",
-        "output": {}
+type AnyPlugin = (typeof InputPlugin | typeof TransformPlugin | typeof OutputPlugin) & {
+    new(config: Object): InputPlugin | TransformPlugin | OutputPlugin   
+};
+type Node = (InputPlugin | TransformPlugin | OutputPlugin | Mapper);
+type Pipeline = {
+    [name: string]: {
+        node: Mapper | OutputPlugin;
+        rawNode: Node;
+        pipedTo: string[];
     }
 };
 
-const PLUGINS: any = {
-    "translate": {
-        "inputs": {
-            "sentence": "text",
-            "language": "text",
-        },
-        "run": async function() {
-            console.log("Running translate..", arguments);
-            return {
-                "translated": "hola"
-            };
-        }
-    },
-    "twitter": {
-        "inputs": {
-            "tweet": "text",
-        },
-        "run": async function() {
-            console.log("Running tweet..", arguments);
-            return;
+interface InputFormat {
+    nodes: {
+        [nodeName: string]: {
+            type: string;
+            [property: string]: any;
+        };
+    };
+    connections: {
+       from: string;
+       to: string;
+       mapping: {
+           [mapping: string]: string
+       };
+    }[];
+}
+let plugins: { [pluginName: string]: AnyPlugin } = {};
+
+export async function loadPlugins(dir: string = "plugins") {
+    let readdirAsync = util.promisify(fs.readdir) as (path: string | Buffer) => Promise<string[]>;
+    let files = await readdirAsync(path.join(__dirname, dir));
+    for (let file of files) {
+        if (path.extname(file) === ".js" && path.basename(file) !== "plugin.js") {
+            try {
+                let imported = await import(path.join(__dirname, dir, path.basename(file, ".js")));
+                // Plugins only export one thing
+                let plugin = imported[Object.keys(imported)[0]] as AnyPlugin;
+
+                plugins[plugin.name] = plugin;
+                console.log(`Loaded plugin: ${plugin.name} from ${file}`);
+            }
+            catch (err) {
+                console.warn(`Could not load plugin from ${file}: ${err.message}`);
+            }
         }
     }
 }
 
-export async function test() {
-    return await parseAndRun(PLUGINS, TEST_JSON, name => {
-        return new Promise<any>((resolve, reject) => resolve({}))
-    });
+export async function parse(input: InputFormat): Promise<Pipeline> {
+    let pipeline: Pipeline = {};
+
+    let froms: string[] = [];
+    let tos: string[] = [];
+    let resolvedTos: string[] = [];
+
+    for (let connection of input.connections) {
+        froms.push(connection.from);
+        tos.push(connection.to);
+    }
+
+    function addToChain(fromName: string, toName: string, mapping: { [mapping: string]: string }): void {
+
+        if (pipeline[fromName] === undefined) {
+            let plugin = plugins[input.nodes[fromName].type];
+            let instance = new plugin(input.nodes[fromName]);
+            pipeline[fromName] = {
+                "node": instance.pipe(new Mapper(mapping, fromName)),
+                "rawNode": instance,
+                "pipedTo": [toName]
+            };
+            console.log(`Mapping for ${fromName} is ${JSON.stringify(mapping)}`);
+        }
+        else {
+            pipeline[fromName].pipedTo.push(toName);
+        }
+        resolvedTos.push(toName);
+    }
+
+    for (let connection of input.connections) {
+        addToChain(connection.from, connection.to, connection.mapping);
+        console.log(`Add node: ${connection.from}`);
+
+        if (froms.indexOf(connection.to) === -1) {
+            let plugin = plugins[input.nodes[connection.to].type];
+            let instance = new plugin(input.nodes[connection.to]) as OutputPlugin;
+            pipeline[connection.to] = {
+                "node": instance,
+                "rawNode": instance,
+                "pipedTo": []
+            };
+            console.log(`Add terminating node: ${connection.to}`);
+        }
+    }
+
+    return pipeline;
 }
 
-// test().then(console.log.bind(console)).catch(console.error.bind(console));
+export async function execute(pipeline: Pipeline) {
+    for (let nodeName of Object.keys(pipeline)) {
+        let pipelineObject = pipeline[nodeName];
+        let node = pipelineObject.node;
+
+        if (pipelineObject.pipedTo.length > 0) {
+            let pipedNodes = pipelineObject.pipedTo.map(pipedNodeName => pipeline[pipedNodeName].rawNode) as (TransformPlugin | OutputPlugin)[];
+            node.pipe(new MultiPipe(pipedNodes));
+            console.log(`Piping ${nodeName} to ${pipelineObject.pipedTo.join(", ")}`);
+        }
+    }
+}
