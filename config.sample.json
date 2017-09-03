@@ -1,0 +1,9 @@
+{
+    "secrets": {
+        "session": "hackgt-notifications",
+        "github": {
+            "id": "",
+            "secret": ""
+        }
+    }
+}
