@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { ensureAuthenticated } from '../util/auth';
 import { Project } from '../model/Project';
-import Pipe from '../controllers/pipes/Pipe';
+import Pipe from '../controllers/Pipe';
 
 
 const router: Router = Router();

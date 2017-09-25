@@ -21,8 +21,8 @@ const admin = ensureIsAdmin({ message: 'You must be an admin to see access this'
 // This is used for autocompleting user fields in the app.
 // MongoDB is bad with searching, so we would have to use redis if
 // sending all users to the client becomes an issue
-router.get('/', authenticate, (req: any, res, next) => {
-    const users = User.find({
+router.get('/', authenticate, async (req: any, res, next) => {
+    const users = await User.find({
             userClass: { $gte: UserClass.User }
         })
         .select('email name');
@@ -37,8 +37,8 @@ router.get('/', authenticate, (req: any, res, next) => {
 
 // Get a detailed list of all users
 // If it becomes an issue, we'll need to paginate this
-router.get('/all', admin, (req: any, res, next) => {
-    const users = User.find({});
+router.get('/all', admin, async (req: any, res, next) => {
+    const users = await User.find({});
 
     if(users === null) {
         res.status(500);
@@ -49,3 +49,5 @@ router.get('/all', admin, (req: any, res, next) => {
 });
 
 // Change the authorization of a user
+
+export default router;

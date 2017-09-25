@@ -4,7 +4,7 @@
     "rules": {
         "callable-types": true,
         "interface-name": true,
-        "interface-over-type-literal": true,
+        "interface-over-type-literal": false,
         "max-classes-per-file": false,
         "max-line-length": [
             true,

@@ -25,6 +25,7 @@ const authenticate = ensureAuthenticated({ message: 'You must be logged in to vi
  *
  * Manipulators
  * POST     /projects                           Create a new project
+ * DELETE   /projects/:project                  Delete a project
  * POST     /projects/:project/users            Add a new collaborator
  * DELETE   /projects/:project/users/:user      Remove a collaborator
  * POST     /projects/:project/pipes            Create a new pipe
@@ -49,10 +50,17 @@ router.get('/', authenticate, async (req, res, next) => {
 /**
  * create a new project
 */
-router.post('/', validate(validation.post), authenticate, (req: any, res, next) => {
+router.post('/', validate(validation.post), authenticate, async (req: any, res, next) => {
     if (!validateName(req.body.name)) {
         res.status(400);
         return res.send({ message: 'The project name can only be letters, numbers, dashes, and underscores' });
+    }
+
+
+    const exists = await Project.findOne({name: req.body.name});
+    if(exists !== null) {
+        res.status(400);
+        return res.send({ message: 'That project name is already in use.' });
     }
 
     const project = new Project({
@@ -64,7 +72,7 @@ router.post('/', validate(validation.post), authenticate, (req: any, res, next) 
         isPublic: req.body.isPublic
     });
 
-    if (saveDocumentOrError(project, res)) {
+    if (await saveDocumentOrError(project, res)) {
         res.json(project);
     }
 });
@@ -76,10 +84,19 @@ router.get('/:project', authenticate, async (req, res, next) => {
             $or: [{ users: req.user._id },
                 { isPublic: true }]
         })
-        .populate('users pipes');
+        .populate('pipes');
 
     if (project !== null) {
         res.json(project);
+    } else {
+        res.sendStatus(404);
+    }
+});
+
+router.delete('/:project', authenticate, async (req, res, next) => {
+    const project = await Project.findOneAndRemove({ name: req.params.project });
+    if (project !== null) {
+        res.json({message: 'Project has successfully been deleted'});
     } else {
         res.sendStatus(404);
     }
@@ -197,14 +214,13 @@ router.post('/:project/pipes', validate(validation.pipes.post), authenticate, as
             description: req.body.description,
             graph: ''
         });
-        if (saveDocumentOrError(pipe, res)) {
+        if (await saveDocumentOrError(pipe, res)) {
             project.pipes.push(pipe);
 
-            if (saveDocumentOrError(project, res)) {
-                res.json(project.pipes);
+            if (await saveDocumentOrError(project, res)) {
+                return res.json(project.pipes);
             }
         }
-        res.json(project);
     } else {
         res.sendStatus(404);
     }
