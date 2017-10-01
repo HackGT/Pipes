@@ -30,6 +30,12 @@ export abstract class OutputPlugin extends Duplex implements IPlugin {
     public _read(size: number) { }
 }
 
+export abstract class NotificationPlugin extends OutputPlugin {
+    constructor() {super();}
+
+    public abstract getContentMap(): Mapper
+}
+
 export abstract class TransformPlugin extends Transform implements IPlugin {
     constructor() {super(commonOptions);}
 

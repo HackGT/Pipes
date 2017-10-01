@@ -24,7 +24,7 @@ router.post('/:project/:pipe', async (req, res, next) => {
         res.json({ message: 'That pipe does not exist in this project' });
     }
 
-    const pipe = new Pipe();
-    pipe.parseFromString(project.pipes[0].graph);
-    res.json(pipe.run(req.body));
+    // const pipe = new Pipe();
+    // pipe.parseFromString(project.pipes[0].graph);
+    // res.json(pipe.run(req.body));
 });

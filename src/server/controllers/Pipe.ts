@@ -20,9 +20,9 @@ export default class Pipe {
 
     private inputs: { [name: string]: Input } = {};
 
-    constructor() {
+    constructor(inputs: { [name: string]: Input }) {
+        this.inputs = inputs
     }
-
     parseFromString(str: string) {
         // Example string
         // a: Input, b: Input, c: Concat, o: Logger |
