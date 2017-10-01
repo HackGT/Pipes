@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 import * as React from "react";
-import { inspectProject } from '../../actions/projects';
+import { inspectProject, updatePipe } from '../../actions/projects';
 import { dismissErrorMessage } from '../../actions/error';
 import { Redirect } from 'react-router';
 import { Project } from '../../reducers/projects';
@@ -18,7 +18,8 @@ type StateToProps = {
 
 type DispatchToProps = {
     inspectProject: (id: string) => void,
-    dismissErrorMessage: () => void
+    dismissErrorMessage: () => void,
+    updatePipe: (projectId: string, pipeId: string, graph: string) => void
 }
 
 type PassedProps = {
@@ -30,6 +31,7 @@ type State = {}
 type Props = StateToProps & DispatchToProps & PassedProps;
 
 class Pipe extends React.Component<Props, State> {
+    input: HTMLTextAreaElement;
 
     componentWillMount() {
         this.props.inspectProject(this.props.match.params.id);
@@ -71,6 +73,8 @@ class Pipe extends React.Component<Props, State> {
                 <pre>
                     {pipe.graph}
                 </pre>
+                <textarea defaultValue={pipe.graph} ref={(input) => this.input = input}/>
+                <button onClick={()=>{this.props.updatePipe(project.name, pipe.name, this.input.value)}}>Save</button>
             </div>
         );
     }
@@ -84,6 +88,7 @@ export default connect<StateToProps, DispatchToProps, PassedProps>(
     }),
     {
         inspectProject,
-        dismissErrorMessage
+        dismissErrorMessage,
+        updatePipe
     }
 )(Pipe);

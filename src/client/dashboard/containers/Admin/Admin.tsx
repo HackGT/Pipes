@@ -3,7 +3,7 @@ import * as React from "react";
 import { Redirect } from 'react-router-dom';
 import { dismissErrorMessage } from '../../actions/error';
 import { Profile, UserClass } from '../../reducers/profile';
-import { fetchUsers } from '../../actions/users';
+import { fetchUsers, updateUser } from '../../actions/users';
 import User from '../../components/User/User';
 
 type StateToProps = {
@@ -12,13 +12,14 @@ type StateToProps = {
         errorMessage: boolean
     },
     services: { [name: string]: boolean },
-    isAdmin: boolean,
+    profile: Profile,
     users: [Profile]
 }
 
 type DispatchToProps = {
     dismissErrorMessage: () => void,
-    fetchUsers: () => void
+    fetchUsers: () => void,
+    updateUser: (id: string, userClass: number) => void
 }
 
 type Props = StateToProps & DispatchToProps;
@@ -31,20 +32,22 @@ class Admin extends React.Component<Props, State> {
     private isPublic: HTMLInputElement;
 
     componentWillMount() {
-        if (this.props.isAdmin) {
+        if (this.props.profile.userClass === UserClass.Admin) {
             this.props.fetchUsers()
         }
     }
 
     render() {
-        if (!this.props.isAdmin) {
+        if (this.props.profile.userClass !== UserClass.Admin) {
             return <Redirect to={'/'}/>;
         }
 
         return (
             <div>
                 {this.props.users.map((user: Profile) => {
-                    return <User key={user.id} user={user}/>
+                    return <User key={user.id} user={user}
+                        isUser={user.id === this.props.profile.id}
+                        updateUser={this.props.updateUser}/>
                 })}
             </div>
         );
@@ -55,11 +58,12 @@ export default connect<StateToProps, DispatchToProps, null>(
     (state) => ({
         error: state.error,
         services: state.services,
-        isAdmin: state.profile.userClass === UserClass.Admin,
+        profile: state.profile,
         users: state.users
     }),
     {
         dismissErrorMessage,
-        fetchUsers
+        fetchUsers,
+        updateUser
     }
 )(Admin);

@@ -20,7 +20,8 @@ export default class Pipe {
 
     private inputs: { [name: string]: Input } = {};
 
-    constructor() {
+    constructor(inputs: { [name: string]: Input } = {}) {
+        this.inputs = inputs
     }
 
     parseFromString(str: string) {
@@ -91,7 +92,7 @@ export default class Pipe {
         }
     }
 
-    run(inputs: { [name: string]: any }) {
+    async run(inputs: { [name: string]: any }) {
         for (const name in inputs) {
             this.inputs[name].push({data:inputs[name]});
         }

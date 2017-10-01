@@ -1,4 +1,4 @@
-import { Pipe, Project } from '../reducers/projects';
+import { Key, Pipe, Project } from '../reducers/projects';
 import { Dispatch } from 'redux';
 import { showErrorMessage } from './error';
 import { throwErrors, updateService } from './services';
@@ -9,6 +9,9 @@ export const REFRESH_PROJECT = 'REFRESH_PROJECT';
 export const REFRESH_PROJECT_USERS = 'REFRESH_PROJECT_USERS';
 export const DELETE_PROJECT = 'DELETE_PROJECT';
 export const CREATE_PIPE = 'CREATE_PIPE';
+export const CREATE_KEY = 'CREATE_KEY';
+export const REMOVE_KEY = 'REMOVE_KEY';
+export const REFRESH_PIPE = 'REFRESH_PIPE';
 
 const loadProjects = (projects: [Project]) => ({
     type: LOAD_PROJECTS,
@@ -34,7 +37,18 @@ const createPipe = (pipe: Pipe) => ({
     type: CREATE_PIPE,
     payload: pipe
 });
-
+const createKey = (id: string, key: Key) => ({
+    type: CREATE_KEY,
+    payload: { id, key }
+});
+const removeKey = (id: string, keys: Key[]) => ({
+    type: REMOVE_KEY,
+    payload: { id, keys }
+});
+const refreshPipe = (projectId: string, pipe: Pipe) => ({
+    type: REFRESH_PIPE,
+    payload: { projectId, pipe }
+});
 
 export const fetchProjects = () => {
     return (dispatch: Dispatch<any>) => {
@@ -138,4 +152,75 @@ export const savePipe = (project: string, name: string, description: string) => 
                 dispatch(updateService('savePipe', false));
             })
     }
+};
+export const saveKey = (project: string, label: string) => {
+    return (dispatch: Dispatch<any>) => {
+        dispatch(updateService('saveKey', true));
+        fetch(URL + '/projects/' + project + '/keys', {
+            credentials: 'same-origin',
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                name: label
+            })
+        })
+            .then(throwErrors)
+            .then((key: Key) => {
+                dispatch(createKey(project, key));
+                dispatch(updateService('saveKey', false));
+            })
+            .catch(e => {
+                dispatch(showErrorMessage(e));
+                dispatch(updateService('saveKey', false));
+            })
+    };
+};
+export const deleteKey = (project: string, label: string) => {
+    return (dispatch: Dispatch<any>) => {
+        dispatch(updateService('deleteKey', true));
+        fetch(URL + '/projects/' + project + '/keys/' + label, {
+            credentials: 'same-origin',
+            method: 'DELETE'
+        })
+            .then(throwErrors)
+            .then((keys: Key[]) => {
+                console.log(keys);
+                dispatch(removeKey(project, keys));
+                dispatch(updateService('deleteKey', false));
+            })
+            .catch(e => {
+                dispatch(showErrorMessage(e));
+                dispatch(updateService('deleteKey', false));
+            })
+    };
+};
+
+export const updatePipe = (projectId: string, pipeId: string, graph: string) => {
+    return (dispatch: Dispatch<any>) => {
+        dispatch(updateService('updatePipe', true));
+        fetch(URL + '/projects/' + projectId + '/pipes/' + pipeId, {
+            credentials: 'same-origin',
+            method: 'PUT',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                graph
+            })
+        })
+            .then(throwErrors)
+            .then((pipe) => {
+                console.log(pipe);
+                dispatch(refreshPipe(projectId, pipe));
+                dispatch(updateService('updatePipe', false));
+            })
+            .catch(e => {
+                dispatch(showErrorMessage(e));
+                dispatch(updateService('updatePipe', false));
+            })
+    };
 };

@@ -13,11 +13,10 @@ interface IOutput {
 
 export class Concat extends TransformPlugin {
     private len: number = Number.MAX_SAFE_INTEGER;
-    private vals: [string] = [] as [string];
+    private vals: string[] = [];
 
 
     public propagate(input: IInput): IOutput {
-        console.log(input);
         if (input.len) {
             this.len = parseInt(input.len, 10);
         }
@@ -28,7 +27,6 @@ export class Concat extends TransformPlugin {
                 this.vals[num] = input[key];
             }
         }
-
         if (this.vals.reduce<number>((counter: number, currentValue: string) =>
                 currentValue === undefined ? counter : counter + 1, 0) === this.len) {
             let str = '';

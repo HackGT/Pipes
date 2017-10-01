@@ -2,6 +2,10 @@ import { Router } from 'express';
 import * as passport from 'passport';
 import { ensureAuthenticated, ensureIsAdmin } from '../util/auth';
 import { User, UserClass } from '../model/User';
+import { validation } from '../util/project';
+import * as validate from 'express-validation';
+import { postUser } from '../util/users';
+import { saveDocumentOrError } from '../util/common';
 
 const router: Router = Router();
 
@@ -27,7 +31,7 @@ router.get('/', authenticate, async (req: any, res, next) => {
         })
         .select('email name');
 
-    if(users === null) {
+    if (users === null) {
         res.status(500);
         res.json({ message: 'Error retrieving users' });
     }
@@ -40,12 +44,25 @@ router.get('/', authenticate, async (req: any, res, next) => {
 router.get('/all', admin, async (req: any, res, next) => {
     const users = await User.find({});
 
-    if(users === null) {
+    if (users === null) {
         res.status(500);
         res.json({ message: 'Error retrieving users' });
     }
 
     res.json(users);
+});
+
+router.post('/:user', admin, validate(postUser), async (req: any, res, next) => {
+    const user = await User.findById(req.params.user);
+
+    if (user !== null) {
+        user.userClass = req.body.userClass;
+        if (await saveDocumentOrError(user, res)) {
+            res.json(user);
+        }
+    } else {
+        res.sendStatus(404);
+    }
 });
 
 // Change the authorization of a user

@@ -1,7 +1,10 @@
 import { connect, Dispatch } from 'react-redux';
 import * as React from "react";
 import { Project as IProject } from '../../reducers/projects';
-import { deleteProject, inspectProject, savePipe } from '../../actions/projects';
+import {
+    deleteKey, deleteProject, inspectProject, saveKey,
+    savePipe
+} from '../../actions/projects';
 import { Redirect } from 'react-router-dom';
 import ProjectSettings from '../../components/ProjectSettings/ProjectSettings';
 import { Profile } from '../../reducers/profile';
@@ -23,7 +26,9 @@ type DispatchToProps = {
     inspectProject: (id: string) => void,
     deleteProject: (id: string) => void
     savePipe: (projectName: string, name: string, description: string) => void,
-    dismissErrorMessage: () => void
+    dismissErrorMessage: () => void,
+    saveKey: (project: string, label: string) => void,
+    deleteKey: (project: string, label: string) => void
 }
 
 type PassedProps = {
@@ -89,7 +94,9 @@ class Project extends React.Component<ProjectProps, State> {
                 project={project}
                 users={users}
                 onCloseButtonClicked={() => {this.setState({ showSettingsModal: false })}}
-                onDeleteButtonClicked={() => {this.props.deleteProject(this.name)}}/>
+                onDeleteButtonClicked={() => {this.props.deleteProject(this.name)}}
+                onAddAPIKeyClicked={this.props.saveKey}
+                onDeleteAPIKeyClicked={this.props.deleteKey}/>
             <NewPipe
                 projectName={project.name}
                 show={this.state.showNewPipeModal}
@@ -118,6 +125,8 @@ export default connect<StateToProps, DispatchToProps, PassedProps>(
         inspectProject,
         deleteProject,
         savePipe,
-        dismissErrorMessage
+        dismissErrorMessage,
+        saveKey,
+        deleteKey
     }
 )(Project);

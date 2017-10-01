@@ -266,7 +266,7 @@ router.put('/:project/pipes/:pipe', validate(validation.pipes.put), authenticate
         pipe.name = req.body.name || pipe.name;
         pipe.description = req.body.description || pipe.description;
         pipe.graph = req.body.graph || pipe.graph;
-        if (saveDocumentOrError(pipe, res)) {
+        if (await saveDocumentOrError(pipe, res)) {
             res.json(pipe);
         }
     } else {
@@ -290,7 +290,7 @@ router.delete('/:project/pipes/:pipe', authenticate, async (req, res, next) => {
             res.json({ message: 'That pipe does not exist in this project' });
         }
         project.pipes = [] as [IPipe];
-        if (saveDocumentOrError(project, res)) {
+        if (await saveDocumentOrError(project, res)) {
             res.json(project);
         }
     } else {
@@ -344,7 +344,7 @@ router.post('/:project/keys', validate(validation.keys.post), authenticate, asyn
             secret: uuid()
         };
         project.keys.push(key);
-        if (saveDocumentOrError(project, res)) {
+        if (await saveDocumentOrError(project, res)) {
             res.json(key);
         }
     } else {
@@ -362,8 +362,9 @@ router.delete('/:project/keys/:key', authenticate, async (req, res, next) => {
 
     if (project !== null) {
         let index = null;
+        console.log(project.keys);
         for (let i = 0; i < project.keys.length; i++) {
-            if (project.keys[i].name === req.body.name) {
+            if (project.keys[i].name === req.params.key) {
                 index = i;
             }
         }
@@ -371,11 +372,12 @@ router.delete('/:project/keys/:key', authenticate, async (req, res, next) => {
         if (index === null) {
             res.status(400);
             res.json({ message: 'That key name does not exist in this project' });
+            return;
         }
 
         project.keys.splice(index, 1);
 
-        if (saveDocumentOrError(project, res)) {
+        if (await saveDocumentOrError(project, res)) {
             res.json(project.keys.map((key) => key.name));
         }
     } else {
