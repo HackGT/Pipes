@@ -340,8 +340,8 @@ router.post('/:project/keys', validate(validation.keys.post), authenticate, asyn
     if (project !== null) {
         const key = {
             name: req.body.name,
-            id: uuid(),
-            secret: uuid()
+            id: uuid().replace(/-/g, ''),
+            secret: uuid().replace(/-/g, '')
         };
         project.keys.push(key);
         if (await saveDocumentOrError(project, res)) {
