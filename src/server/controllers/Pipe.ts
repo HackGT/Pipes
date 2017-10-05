@@ -3,6 +3,9 @@ import { Static } from './nodes/Static';
 import { Input } from './nodes/Input';
 import { Logger } from './nodes/Logger';
 import { Concat } from './nodes/Concat';
+import { Slack } from './nodes/Slack';
+import { Twitter } from './nodes/Twitter';
+import { Email } from './nodes/Email';
 
 type AnyPlugin = (typeof InputPlugin | typeof TransformPlugin | typeof OutputPlugin) & {
     new(config: Object): InputPlugin | TransformPlugin | OutputPlugin
@@ -12,7 +15,10 @@ type Node = (InputPlugin | TransformPlugin | OutputPlugin | Mapper);
 const plugins: { [pluginName: string]: AnyPlugin } = {
     'Logger': Logger,
     'Concat': Concat,
-    'Input': Input
+    'Input': Input,
+    'Slack': Slack,
+    'Twitter': Twitter,
+    'Email': Email,
 };
 
 
