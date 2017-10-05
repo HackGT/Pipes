@@ -42,6 +42,12 @@ concat.pipe(log);
 
 const pipe = new Pipe(Inputs);
 pipe.run({
-    input1: 'hello',
-    input2: ' world'
+    input1: {
+    	data:'hello',
+    	iterable: false
+    },
+    input2: {
+    	data: ' world',
+    	iterable: false
+    }
 });
