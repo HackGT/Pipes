@@ -2,6 +2,10 @@ import { Router } from 'express';
 import * as passport from 'passport';
 import { ensureAuthenticated, ensureIsAdmin } from '../util/auth';
 import { User, UserClass } from '../model/User';
+import { validation } from '../util/project';
+import * as validate from 'express-validation';
+import { postUser } from '../util/users';
+import { saveDocumentOrError } from '../util/common';
 
 const router: Router = Router();
 
@@ -21,13 +25,13 @@ const admin = ensureIsAdmin({ message: 'You must be an admin to see access this'
 // This is used for autocompleting user fields in the app.
 // MongoDB is bad with searching, so we would have to use redis if
 // sending all users to the client becomes an issue
-router.get('/', authenticate, (req: any, res, next) => {
-    const users = User.find({
+router.get('/', authenticate, async (req: any, res, next) => {
+    const users = await User.find({
             userClass: { $gte: UserClass.User }
         })
         .select('email name');
 
-    if(users === null) {
+    if (users === null) {
         res.status(500);
         res.json({ message: 'Error retrieving users' });
     }
@@ -37,10 +41,10 @@ router.get('/', authenticate, (req: any, res, next) => {
 
 // Get a detailed list of all users
 // If it becomes an issue, we'll need to paginate this
-router.get('/all', admin, (req: any, res, next) => {
-    const users = User.find({});
+router.get('/all', admin, async (req: any, res, next) => {
+    const users = await User.find({});
 
-    if(users === null) {
+    if (users === null) {
         res.status(500);
         res.json({ message: 'Error retrieving users' });
     }
@@ -48,4 +52,19 @@ router.get('/all', admin, (req: any, res, next) => {
     res.json(users);
 });
 
+router.post('/:user', admin, validate(postUser), async (req: any, res, next) => {
+    const user = await User.findById(req.params.user);
+
+    if (user !== null) {
+        user.userClass = req.body.userClass;
+        if (await saveDocumentOrError(user, res)) {
+            res.json(user);
+        }
+    } else {
+        res.sendStatus(404);
+    }
+});
+
 // Change the authorization of a user
+
+export default router;

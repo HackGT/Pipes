@@ -25,6 +25,7 @@ const authenticate = ensureAuthenticated({ message: 'You must be logged in to vi
  *
  * Manipulators
  * POST     /projects                           Create a new project
+ * DELETE   /projects/:project                  Delete a project
  * POST     /projects/:project/users            Add a new collaborator
  * DELETE   /projects/:project/users/:user      Remove a collaborator
  * POST     /projects/:project/pipes            Create a new pipe
@@ -49,10 +50,17 @@ router.get('/', authenticate, async (req, res, next) => {
 /**
  * create a new project
 */
-router.post('/', validate(validation.post), authenticate, (req: any, res, next) => {
+router.post('/', validate(validation.post), authenticate, async (req: any, res, next) => {
     if (!validateName(req.body.name)) {
         res.status(400);
         return res.send({ message: 'The project name can only be letters, numbers, dashes, and underscores' });
+    }
+
+
+    const exists = await Project.findOne({name: req.body.name});
+    if(exists !== null) {
+        res.status(400);
+        return res.send({ message: 'That project name is already in use.' });
     }
 
     const project = new Project({
@@ -64,7 +72,7 @@ router.post('/', validate(validation.post), authenticate, (req: any, res, next) 
         isPublic: req.body.isPublic
     });
 
-    if (saveDocumentOrError(project, res)) {
+    if (await saveDocumentOrError(project, res)) {
         res.json(project);
     }
 });
@@ -76,10 +84,19 @@ router.get('/:project', authenticate, async (req, res, next) => {
             $or: [{ users: req.user._id },
                 { isPublic: true }]
         })
-        .populate('users pipes');
+        .populate('pipes');
 
     if (project !== null) {
         res.json(project);
+    } else {
+        res.sendStatus(404);
+    }
+});
+
+router.delete('/:project', authenticate, async (req, res, next) => {
+    const project = await Project.findOneAndRemove({ name: req.params.project });
+    if (project !== null) {
+        res.json({message: 'Project has successfully been deleted'});
     } else {
         res.sendStatus(404);
     }
@@ -197,14 +214,13 @@ router.post('/:project/pipes', validate(validation.pipes.post), authenticate, as
             description: req.body.description,
             graph: ''
         });
-        if (saveDocumentOrError(pipe, res)) {
+        if (await saveDocumentOrError(pipe, res)) {
             project.pipes.push(pipe);
 
-            if (saveDocumentOrError(project, res)) {
-                res.json(project.pipes);
+            if (await saveDocumentOrError(project, res)) {
+                return res.json(project.pipes);
             }
         }
-        res.json(project);
     } else {
         res.sendStatus(404);
     }
@@ -250,7 +266,7 @@ router.put('/:project/pipes/:pipe', validate(validation.pipes.put), authenticate
         pipe.name = req.body.name || pipe.name;
         pipe.description = req.body.description || pipe.description;
         pipe.graph = req.body.graph || pipe.graph;
-        if (saveDocumentOrError(pipe, res)) {
+        if (await saveDocumentOrError(pipe, res)) {
             res.json(pipe);
         }
     } else {
@@ -274,7 +290,7 @@ router.delete('/:project/pipes/:pipe', authenticate, async (req, res, next) => {
             res.json({ message: 'That pipe does not exist in this project' });
         }
         project.pipes = [] as [IPipe];
-        if (saveDocumentOrError(project, res)) {
+        if (await saveDocumentOrError(project, res)) {
             res.json(project);
         }
     } else {
@@ -324,11 +340,11 @@ router.post('/:project/keys', validate(validation.keys.post), authenticate, asyn
     if (project !== null) {
         const key = {
             name: req.body.name,
-            id: uuid(),
-            secret: uuid()
+            id: uuid().replace(/-/g, ''),
+            secret: uuid().replace(/-/g, '')
         };
         project.keys.push(key);
-        if (saveDocumentOrError(project, res)) {
+        if (await saveDocumentOrError(project, res)) {
             res.json(key);
         }
     } else {
@@ -346,8 +362,9 @@ router.delete('/:project/keys/:key', authenticate, async (req, res, next) => {
 
     if (project !== null) {
         let index = null;
+        console.log(project.keys);
         for (let i = 0; i < project.keys.length; i++) {
-            if (project.keys[i].name === req.body.name) {
+            if (project.keys[i].name === req.params.key) {
                 index = i;
             }
         }
@@ -355,11 +372,12 @@ router.delete('/:project/keys/:key', authenticate, async (req, res, next) => {
         if (index === null) {
             res.status(400);
             res.json({ message: 'That key name does not exist in this project' });
+            return;
         }
 
         project.keys.splice(index, 1);
 
-        if (saveDocumentOrError(project, res)) {
+        if (await saveDocumentOrError(project, res)) {
             res.json(project.keys.map((key) => key.name));
         }
     } else {

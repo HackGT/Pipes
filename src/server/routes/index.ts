@@ -30,7 +30,7 @@ router.get('/logout', (req, res) => {
 });
 
 router.get('/account', ensureAuthenticated('/'), (req, res) => {
-    res.json({ user: req.user });
+    res.json(req.user);
 });
 
 export default router;

@@ -1,4 +1,3 @@
-import * as mongoose from 'mongoose';
 import { model, Document, Schema } from 'mongoose';
 
 export interface IPipe extends Document {

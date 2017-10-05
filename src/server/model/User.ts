@@ -1,11 +1,10 @@
-import * as mongoose from 'mongoose';
 import { model, Document, Schema } from 'mongoose';
 
 export enum UserClass {
-    Admin = 3,
-    User = 2,
-    Pending = 1,
-    Rejected = 0
+    Admin,
+    User,
+    Pending,
+    Rejected
 }
 
 export interface IUser extends Document {
@@ -20,14 +19,14 @@ export interface IUser extends Document {
 }
 
 const userSchema = new Schema({
-   email: {type: String, required: true},
-   name: {type: String, required: true},
-   userClass: {type: Number, required: true},
-   github: {
-       id: {type: String, required: true},
-       username: {type: String, required: true},
-       profileUrl: {type: String, required: true}
-   }
+    email: { type: String, required: true },
+    name: { type: String, required: true },
+    userClass: { type: Number, required: true },
+    github: {
+        id: { type: String, required: true },
+        username: { type: String, required: true },
+        profileUrl: { type: String, required: true }
+    }
 });
 
 export const User = model<IUser>('User', userSchema);
