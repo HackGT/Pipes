@@ -1,4 +1,4 @@
-<img alt="Pipes Logo" src="https://raw.githubusercontent.com/HackGT/Pipes/master/src/client/assets/PipesLogo.png" width="150">
+<img alt="Pipes Logo" src="https://raw.githubusercontent.com/HackGT/Pipes/master/src/client/home/PipesLogo.png" width="150">
 
 # HackGT Notifications Pipeline
 > Also known as IO

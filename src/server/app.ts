@@ -11,6 +11,8 @@ import * as mongoose from 'mongoose';
 import index from './routes/index';
 import auth from './routes/auth';
 import projects from './routes/projects';
+import users from './routes/users';
+import api from './routes/api';
 import { APP_URL } from './util/common';
 import { Compiler } from 'webpack';
 import { IUser, User, UserClass } from './model/User';
@@ -58,7 +60,7 @@ passport.use(new GithubStrategy({
         }
     }
 
-    if (user.userClass === 0) {
+    if (user.userClass === UserClass.Rejected || user.userClass === UserClass.Pending) {
         done(null, false, { 'message': 'Your account has not been approved by an admin yet' });
     } else {
         done(null, user);
@@ -91,6 +93,8 @@ app.use(passport.session());
 app.use('/', index);
 app.use('/auth', auth);
 app.use('/projects', projects);
+app.use('/users', users);
+app.use('/api', api);
 if (process.env.NODE_ENV === 'dev') {
     console.log('DEVOLOPMENT ENVIRONMENT: Turning on WebPack Middleware...');
 

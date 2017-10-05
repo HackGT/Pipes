@@ -1,16 +1,14 @@
 import { Router } from 'express';
 import { ensureAuthenticated } from '../util/auth';
 import { Project } from '../model/Project';
-import Pipe from '../controllers/pipes/Pipe';
+import Pipe from '../controllers/Pipe';
 
 
 const router: Router = Router();
 
 router.post('/:project/:pipe', async (req, res, next) => {
     const project = await Project.findOne({
-            name: req.params.project,
-            $or: [{ users: req.user._id },
-                { isPublic: true }]
+            name: req.params.project
         })
         .select('pipes')
         .populate({ path: 'pipes', match: { 'name': req.params.pipe } });
@@ -28,3 +26,5 @@ router.post('/:project/:pipe', async (req, res, next) => {
     pipe.parseFromString(project.pipes[0].graph);
     res.json(pipe.run(req.body));
 });
+
+export default router;

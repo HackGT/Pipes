@@ -18,13 +18,13 @@ const loadDashboardApp = new HtmlWebpackPlugin({
 
 // Load Static Assets
 const loadStaticFiles = new CopyWebpackPlugin([{
-    from: path.resolve(__dirname, 'assets'),
+    from: path.resolve(__dirname, 'assets/'),
     to: '../assets'
 }]);
 
 // Load Sass files
 const extractSass = new ExtractTextPlugin({
-    filename: "[name].[contenthash].css",
+    filename: "[name].css",
     disable: process.env.NODE_ENV === "development"
 });
 

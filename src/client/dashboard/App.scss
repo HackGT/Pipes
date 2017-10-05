@@ -1,0 +1,34 @@
+.modal {
+  border: solid 1px black;
+  position: fixed;
+  display: block;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  -moz-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  -o-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  background-color: white;
+
+  padding: 2em;
+  .close {
+    position: absolute;
+    right: .5em;
+    top: .5em;
+    background: none;
+    border:none;
+  }
+  h2, h3 {
+    margin: 0;
+  }
+}
+
+.modal-bg {
+  position: absolute;
+  width:100vw;
+  height:100vh;
+  left:0;
+  top:0;
+  background-color: transparentize(black, .7);
+}

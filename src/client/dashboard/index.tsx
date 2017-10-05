@@ -1,9 +1,13 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 
-import { Hello } from "./components/Hello/Hello";
+import { Provider } from 'react-redux';
+import store from './store';
+import App from './App';
 
 ReactDOM.render(
-    <Hello compiler="TypeScript" framework="React" />,
-    document.getElementById("app")
+    <Provider store={store}>
+        <App/>
+    </Provider>,
+    document.getElementById('app')
 );
