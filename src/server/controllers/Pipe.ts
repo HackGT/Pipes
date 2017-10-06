@@ -99,7 +99,10 @@ export default class Pipe {
 
     async run(inputs: { [name: string]: any }) {
         for (const name in inputs) {
-            this.inputs[name].push({data:inputs[name]});
+            this.inputs[name].push({
+                data:inputs[name]['data'],
+                iterable:inputs[name]['isIterable'],
+            });
         }
     }
 }
