@@ -16,6 +16,9 @@ export class Slack extends OutputPlugin {
 
     public propagate(input: Input): void {
         for (const key of Object.keys(input)) {
+            if (key === 'iterable') {
+                continue;
+            }
             this.body += `&${key}=${input[key]}`;
             this.counter++;
         }
