@@ -75,12 +75,36 @@ apiKeyMapper.pipe(email);
 
 const pipe = new Pipe(Inputs);
 pipe.run({
-    content: 'Hello hackGT',
-    token: process.env.SLACK_API_KEY,
-    twitter_key: process.env.TWITTER_KEY,
-    subject: 'Hello from HackGT',
-    to: 'joshualaurencio@gmail.com',
-    from: 'hello@hack.gt',
-    api_user: process.env.API_USER,
-    api_key: process.env.API_KEY
+    content: {
+        data: ['Hello hackGT', 'Foobar hackgt'],
+        isIterable: true
+    },
+    token: {
+        data: process.env.SLACK_API_KEY,
+        isIterable: false
+    },
+    twitter_key: {
+        data: process.env.TWITTER_KEY,
+        isIterable: false
+    },
+    subject: {
+        data: 'Hello from HackGT',
+        isIterable: false
+    },
+    to: {
+        data: ['foobar@binkmail.com', 'barfoo@binkmail.com', 'zoobar@binkmail.com'],
+        isIterable: true
+    },
+    from: {
+        data: 'hello@hack.gt',
+        isIterable: false
+    },
+    api_user: {
+        data: process.env.API_USER,
+        isIterable: false
+    },
+    api_key: {
+        data: process.env.API_KEY,
+        isIterable: false
+    }
 });
