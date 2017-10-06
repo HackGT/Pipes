@@ -1,9 +1,9 @@
 import { Input } from './nodes/Input';
 import { Concat } from './nodes/Concat';
 import { Logger } from './nodes/Logger';
-import Pipe from './Pipe';
-import { Mapper } from './nodes/Node';
-import { Static } from './nodes/Static';
+import Pipe from '../controllers/Pipe';
+import { Mapper } from '../controllers/Node';
+import { Static } from '../controllers/plugins/Static';
 
 // Input 1
 //        \

@@ -1,7 +1,7 @@
 const nodemailer = require('nodemailer');
 const sgTransport = require('nodemailer-sendgrid-transport');
 
-import { OutputPlugin, Mapper } from './Node';
+import { OutputPlugin, Mapper } from '../../controllers/Node';
 
 interface Input {
     [K: string]: string;

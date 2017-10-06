@@ -1,10 +1,10 @@
-import { InputPlugin } from './Node';
+import { Input } from '../Input';
 
 interface IOutput {
     data: string;
 }
 
-export class Static extends InputPlugin {
+export class Static extends Input {
     constructor(config: { data: string }) {
         super();
 

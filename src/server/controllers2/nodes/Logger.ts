@@ -1,4 +1,4 @@
-import { OutputPlugin } from './Node';
+import { OutputPlugin } from '../../controllers/Node';
 
 interface Input {
     data: string;

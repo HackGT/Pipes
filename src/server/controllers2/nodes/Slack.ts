@@ -1,6 +1,6 @@
 const request = require('request');
 
-import { OutputPlugin, Mapper } from './Node';
+import { OutputPlugin, Mapper } from '../../controllers/Node';
 
 interface Input {
 }

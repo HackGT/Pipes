@@ -1,25 +1,24 @@
-import { InputPlugin, Mapper, OutputPlugin, TransformPlugin } from './nodes/Node';
-import { Static } from './nodes/Static';
-import { Input } from './nodes/Input';
-import { Logger } from './nodes/Logger';
-import { Concat } from './nodes/Concat';
-import { Slack } from './nodes/Slack';
-import { Twitter } from './nodes/Twitter';
-import { Email } from './nodes/Email';
+import { Input } from './Input';
+import { TransformPlugin } from './Transformer';
+import { OutputPlugin } from './Output';
+import { Mapper } from './Mapper';
+import { Static } from './plugins/Static';
 
-type AnyPlugin = (typeof InputPlugin | typeof TransformPlugin | typeof OutputPlugin) & {
-    new(config: Object): InputPlugin | TransformPlugin | OutputPlugin
+type Node = (Input | TransformPlugin | OutputPlugin) & {
+    new(): Input | TransformPlugin | OutputPlugin
 };
-type Node = (InputPlugin | TransformPlugin | OutputPlugin | Mapper);
 
-const plugins: { [pluginName: string]: AnyPlugin } = {
-    'Logger': Logger,
-    'Concat': Concat,
-    'Input': Input,
-    'Slack': Slack,
-    'Twitter': Twitter,
-    'Email': Email,
+const plugins: { [pluginName: string]: Node } = {
+    // 'Logger': Logger,
+    // 'Concat': Concat,
+    // 'Input': Input,
+    // 'Slack': Slack,
+    // 'Twitter': Twitter,
+    // 'Email': Email,
 };
+const illegalProperties = [
+    'iterable'
+];
 
 
 export default class Pipe {
@@ -80,6 +79,10 @@ export default class Pipe {
                 throw new Error(`Node ${to} must be declared.`);
             }
 
+            if(prop in illegalProperties) {
+                throw new Error(`Property ${prop} is illegal.`);
+            }
+
             // Static values to Nodes
             if (from.charAt(0) === '"' && from.charAt(from.length - 1) === '"') {
                 const val = new Static({ data: from.slice(1, from.length - 1) });
@@ -101,7 +104,7 @@ export default class Pipe {
         for (const name in inputs) {
             this.inputs[name].push({
                 data:inputs[name]['data'],
-                iterable:inputs[name]['isIterable'],
+                iterable:inputs[name]['iterable'],
             });
         }
     }

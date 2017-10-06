@@ -1,4 +1,4 @@
-import { TransformPlugin } from './Node';
+import { TransformPlugin } from '../../controllers/Node';
 import { isNumeric } from 'tslint';
 
 interface IInput {
