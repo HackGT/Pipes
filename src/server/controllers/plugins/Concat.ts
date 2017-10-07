@@ -13,37 +13,60 @@ export class Concat extends TransformPlugin {
     };
     private counter = 0;
 
-    public async propagate(input: pipeInput): Promise<pipeOutput> {
-        // decompose input
-        const keys = Object.keys(input);
-        if (keys.length !== 2) throw Error(`Concat received ${keys.length} keys as an input when it should only receive 2`);
-        let iterable, val, key = null;
+    public getNodeName(): string {
+        return 'Concat';
+    }
 
-        for(const k in keys) {
-            if(key==='iterable') {
-                iterable = input[k]
-            } else {
-                val = input[k];
-                key = k;
+    public async propagate(): Promise<pipeOutput> {
+        const shouldIter = this.numIter !== null;
+        let out: string[] | string = '';
+        if (shouldIter) {
+            out = [];
+            for (let i = 0; i < this.numIter; i++) {
+                out[i] = ''
             }
         }
 
-        // build dependencies
-        if(key==='len') {
+        // iterate through each value
+        for (const z in this.dependencies.values) {
+            const data = this.dependencies.values[z].val;
+            const iter = this.dependencies.values[z].iterable;
+
+            if (shouldIter) {
+                for (let i = 0; i < this.numIter; i++) {
+                    (out as string[])[i]+= iter ? data[i] : data;
+                }
+            } else {
+                out += (data as string);
+            }
+        }
+        return {data: out, iterable: shouldIter};
+    }
+
+    public isSatisfied(): boolean {
+        return this.counter === this.dependencies.len;
+    }
+
+    public buildDependencies(iterable, val, key) {
+        // parse len as number and save
+        if (key === 'len') {
             const len = parseInt(val, 10);
-            if(iterable===true || isNaN(len)) throw Error(`Concat's property 'len' must be a single number. Unexpected value ${val}`);
+            if (iterable === true || isNaN(len))
+                throw Error(`Concat's property 'len' must be a single number. Unexpected value ${val}`);
             this.dependencies.len = len;
+
+            // parse z-indexes as number and save
         } else {
             const z = parseInt(key, 10);
-            if(isNaN(z)) throw Error(`Concat's property key must be a single number. Unexpected key ${z}`);
-            this.dependencies.values[z] = val;
+            if (isNaN(z))
+                throw Error(`Concat's property key must be a single number. Unexpected key ${z}`);
+            this.dependencies.values[z] = { val, iterable };
+            if (iterable === true) {
+                if (this.numIter === null) this.numIter = val.length;
+                else if (this.numIter !== val.length || !Array.isArray(val))
+                    throw Error('Iterable concat inputs must be arrays of the same length');
+            }
             this.counter++;
-        }
-
-        // check if dependencies met
-        if(this.counter === this.dependencies.len) {
-            // do concat work
-            return;
         }
     }
 }

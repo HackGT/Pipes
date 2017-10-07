@@ -14,4 +14,16 @@ export type mappedInput = {
     iterable: boolean,
 }
 
+export type input = {
+    iterable: boolean,
+    val: any,
+    key: string
+}
+
 export type pipeInput = pipeOutput & mappedInput;
+
+export interface Node {
+    getNodeName(): string;
+    buildDependencies(iterable, value, key);
+    isSatisfied(): boolean;
+}

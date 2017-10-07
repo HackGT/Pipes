@@ -32,7 +32,9 @@
     "react-router-dom": "^4.2.2",
     "redux": "^3.7.2",
     "redux-thunk": "^2.2.0",
+    "request": "^2.83.0",
     "requests": "^0.2.2",
+    "slack-node": "^0.1.8",
     "uuid": "^3.1.0"
   },
   "devDependencies": {
@@ -53,6 +55,8 @@
     "@types/react-router-dom": "^4.0.7",
     "@types/redux": "^3.6.0",
     "@types/redux-thunk": "^2.1.0",
+    "@types/request": "^2.0.4",
+    "@types/slack-node": "^0.1.1",
     "@types/uuid": "^3.4.0",
     "@types/webpack-dev-middleware": "^1.9.2",
     "@types/webpack-hot-middleware": "^2.15.0",

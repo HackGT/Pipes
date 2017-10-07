@@ -3,18 +3,20 @@ import { TransformPlugin } from './Transformer';
 import { OutputPlugin } from './Output';
 import { Mapper } from './Mapper';
 import { Static } from './plugins/Static';
+import { Concat } from './plugins/Concat';
+import { Logger } from './plugins/Logger';
+import { Email } from './plugins/Email';
+import { Slack } from './plugins/Slack';
 
-type Node = (Input | TransformPlugin | OutputPlugin) & {
-    new(): Input | TransformPlugin | OutputPlugin
-};
+type NodeConstructor = { new(): Input | TransformPlugin | OutputPlugin };
 
-const plugins: { [pluginName: string]: Node } = {
-    // 'Logger': Logger,
-    // 'Concat': Concat,
-    // 'Input': Input,
-    // 'Slack': Slack,
+const plugins: { [pluginName: string]: NodeConstructor } = {
+    'Logger': Logger,
+    'Concat': Concat,
+    'Input': Input,
+    'Slack': Slack,
     // 'Twitter': Twitter,
-    // 'Email': Email,
+    'Email': Email,
 };
 const illegalProperties = [
     'iterable'
@@ -28,14 +30,14 @@ export default class Pipe {
     constructor(inputs: { [name: string]: Input } = {}) {
         this.inputs = inputs
     }
+
     parseFromString(str: string) {
         // Example string
         // a: Input, b: Input, c: Concat, o: Logger |
         // a -[0]-> c |
         // b -[1]-> c |
         // "2" -[len]-> c |
-        // c -[data]-> o |
-        // " yeah!!" -[data]-> o
+        // c -[data]-> o
 
         const lines = str.split('|');
 
@@ -79,7 +81,7 @@ export default class Pipe {
                 throw new Error(`Node ${to} must be declared.`);
             }
 
-            if(prop in illegalProperties) {
+            if (illegalProperties.includes(prop)) {
                 throw new Error(`Property ${prop} is illegal.`);
             }
 
@@ -103,8 +105,9 @@ export default class Pipe {
     async run(inputs: { [name: string]: any }) {
         for (const name in inputs) {
             this.inputs[name].push({
-                data:inputs[name]['data'],
-                iterable:inputs[name]['iterable'],
+                data: inputs[name]['data'],
+                iterable: inputs[name]['iterable'] === undefined ?
+                    false : inputs[name]['iterable'],
             });
         }
     }

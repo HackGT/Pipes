@@ -1,9 +1,4 @@
-import { Input } from './nodes/Input';
-import { Concat } from './nodes/Concat';
-import { Logger } from './nodes/Logger';
-import Pipe from '../controllers/Pipe';
-import { Mapper } from '../controllers/Node';
-import { Static } from '../controllers/plugins/Static';
+
 
 // Input 1
 //        \
@@ -16,6 +11,13 @@ import { Static } from '../controllers/plugins/Static';
 // Input 2
 
 // Define out inputs
+import { Input } from './Input';
+import { Mapper } from './Mapper';
+import { Static } from './plugins/Static';
+import { Concat } from './plugins/Concat';
+import { Logger } from './plugins/Logger';
+import Pipe from './Pipe';
+
 const Inputs = {
     input1: new Input(), // Takes in value from Pipe and pushes forward { 'data': value }
     input2: new Input() // Takes in value from Pipe and pushes forward { 'data': value }
