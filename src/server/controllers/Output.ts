@@ -19,7 +19,6 @@ export abstract class OutputPlugin extends Transform implements Node{
     public _write(chunk: any, encoding: string, callback: Function): void {
         const { iterable, val, key } = this.decomposeInput(chunk);
         this.buildDependencies(iterable, val, key);
-
         if (this.isSatisfied()) {
             this.propagate().then(outputMessage => {
                 this.push(`[${this.getNodeName()}]: ${outputMessage}`);
