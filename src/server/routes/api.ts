@@ -39,7 +39,6 @@ router.post('/:project/:pipe', async (req, res, next) => {
     const pass = credentials.slice(index + 1);
 
     let authorized = false;
-    console.log(project);
     for(const {id, secret} of project.keys) {
         if(id===user && secret==pass) {
             authorized = true;
