@@ -45,11 +45,12 @@ export class Push extends OutputPlugin {
                 });
             }
         );
+	// all dependencies can only be single values rn, but keeping this here in case we change that.
         if(this.numIter === null) this.numIter = 1;
         for (let i = 0; i < this.numIter; i++) {
             const promise = sendMessage(
             	appId,
-            	content,
+            	Array.isArray(content) ? content[i] : content,
             	apiKey)
                 .then(val => outputs[i] = JSON.stringify(val))
                 .catch(err => outputs[i] = JSON.stringify(err));
