@@ -11,10 +11,6 @@ RUN apk update && apk add \
 # npm install -g npm@latest doesn't work -> see https://github.com/npm/npm/issues/15611#issuecomment-289133810 for this hack
 RUN npm install npm@"~5.4.0" && rm -rf /usr/local/lib/node_modules && mv node_modules /usr/local/lib
 
-RUN mkdir -p /usr/src/pipes
-WORKDIR /usr/src/pipes
+WORKDIR "/src"
 
-# Bundle app source
-COPY . /usr/src/pipes
-EXPOSE 3000
-CMD ["npm", "run", "serve"]
+CMD ["npm", "run", "build"]

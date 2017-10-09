@@ -104,7 +104,7 @@ class Project extends React.Component<ProjectProps, State> {
                 savePipe={this.props.savePipe}
                 error={this.props.error}
                 saving={this.props.services.savePipe}
-                dismissErrorMessage={dismissErrorMessage}/>
+                dismissErrorMessage={this.props.dismissErrorMessage}/>
             <p>{project.description}</p>
 
             {project.pipes ? project.pipes.map((pipe) => {

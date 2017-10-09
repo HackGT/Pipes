@@ -20,13 +20,13 @@ import { IUser, User, UserClass } from './model/User';
 const session = require('express-session');
 const GithubStrategy = require('passport-github2').Strategy as any;
 const flash = require('connect-flash');
-const config = require('../config.json');
+const config = require(process.env.SETTINGS_FILE);
 
 
 const app: express.Express = express();
 
 (mongoose as any).Promise = Promise; // Because the typings file incorrectly defines Promise as readonly
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/', {
+mongoose.connect(process.env.MONGO_URL || 'mongodb://localhost/', {
     useMongoClient: true
 });
 passport.use(new GithubStrategy({

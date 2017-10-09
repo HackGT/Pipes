@@ -14,4 +14,4 @@ node_modules/
 # Build
 out/
 
-config.json
+secrets.json

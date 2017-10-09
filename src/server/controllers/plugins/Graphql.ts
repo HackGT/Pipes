@@ -62,7 +62,6 @@ export class GraphQL extends OutputPlugin {
         }
         await Promise.all(promises);
 
-        console.log(outputs);
         if (outputs.length === 1) return outputs[0];
         return outputs;
     }

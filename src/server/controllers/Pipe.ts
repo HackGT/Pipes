@@ -9,6 +9,7 @@ import { Email } from './plugins/Email';
 import { Slack } from './plugins/Slack';
 import { Twitter } from './plugins/Twitter';
 import { GraphQL } from './plugins/Graphql';
+import { Push } from './plugins/Push';
 
 type NodeConstructor = { new(): Input | TransformPlugin | OutputPlugin };
 
@@ -19,7 +20,8 @@ const plugins: { [pluginName: string]: NodeConstructor } = {
     'Slack': Slack,
     // 'Twitter': Twitter,
     'Email': Email,
-    'GraphQL': GraphQL
+    'GraphQL': GraphQL,
+    'Push': Push,
 };
 const illegalProperties = [
     'iterable'
