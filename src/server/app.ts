@@ -20,7 +20,7 @@ import { IUser, User, UserClass } from './model/User';
 const session = require('express-session');
 const GithubStrategy = require('passport-github2').Strategy as any;
 const flash = require('connect-flash');
-const config = require('../secrets.json');
+const config = require(process.env.SETTINGS_FILE);
 
 
 const app: express.Express = express();
