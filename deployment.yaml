@@ -4,3 +4,9 @@ git:
 
 wants:
     mongo: true
+files:
+  /etc/pipes:
+    secret: true
+    contents:
+      secrets.json:
+        env: SETTINGS_FILE
