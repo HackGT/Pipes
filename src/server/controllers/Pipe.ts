@@ -10,6 +10,7 @@ import { Slack } from './plugins/Slack';
 import { Twitter } from './plugins/Twitter';
 import { GraphQL } from './plugins/Graphql';
 import { Push } from './plugins/Push';
+import { Twitter } from './plugins/Twitter';
 
 type NodeConstructor = { new(): Input | TransformPlugin | OutputPlugin };
 
@@ -18,7 +19,7 @@ const plugins: { [pluginName: string]: NodeConstructor } = {
     'Concat': Concat,
     'Input': Input,
     'Slack': Slack,
-    // 'Twitter': Twitter,
+    'Twitter': Twitter,
     'Email': Email,
     'GraphQL': GraphQL,
     'Push': Push,
