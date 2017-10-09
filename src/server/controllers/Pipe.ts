@@ -7,6 +7,8 @@ import { Concat } from './plugins/Concat';
 import { Logger } from './plugins/Logger';
 import { Email } from './plugins/Email';
 import { Slack } from './plugins/Slack';
+import { Twitter } from './plugins/Twitter';
+import { GraphQL } from './plugins/Graphql';
 
 type NodeConstructor = { new(): Input | TransformPlugin | OutputPlugin };
 
@@ -17,6 +19,7 @@ const plugins: { [pluginName: string]: NodeConstructor } = {
     'Slack': Slack,
     // 'Twitter': Twitter,
     'Email': Email,
+    'GraphQL': GraphQL
 };
 const illegalProperties = [
     'iterable'
