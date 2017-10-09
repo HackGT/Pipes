@@ -6,7 +6,7 @@
   "scripts": {
     "start": "gulp",
     "serve": "node out/bin/www.js",
-    "build": "npm install && gulp build"
+    "build": "npm install; gulp build"
   },
   "author": "",
   "license": "ISC",

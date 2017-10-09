@@ -1,12 +1,5 @@
 {
     "server": {
         "url": ""
-    },
-    "secrets": {
-        "session": "",
-        "github": {
-            "id": "",
-            "secret": ""
-        }
     }
 }
