@@ -1,6 +1,9 @@
 {
+    "server": {
+        "url": ""
+    },
     "secrets": {
-        "session": "hackgt-notifications",
+        "session": "",
         "github": {
             "id": "",
             "secret": ""
