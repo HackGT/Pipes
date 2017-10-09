@@ -8,5 +8,4 @@ WORKDIR /usr/src/pipes
 COPY . /usr/src/pipes
 RUN npm install
 EXPOSE 3000
-CMD ["npm", "run build"]
-CMD ["npm", "run serve"]
+CMD ["npm", "run", "serve"]

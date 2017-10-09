@@ -1,0 +1,6 @@
+FROM node:alpine
+MAINTAINER Anthony Liu <ajliu@gatech.edu>
+
+WORKDIR "/src"
+RUN "npm install"
+CMD ["npm", "run", "build"]
