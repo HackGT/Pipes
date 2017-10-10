@@ -27,7 +27,8 @@ export class Slack extends OutputPlugin {
         const sendMessage = (channel, text) => new Promise((resolve, reject) => {
                 slack.api('chat.postMessage', {
                     channel,
-                    text
+                    text,
+                    parse: 'full'
                 }, function (err, response) {
                     if (err) {
                         reject(err);
@@ -43,8 +44,8 @@ export class Slack extends OutputPlugin {
             const promise = sendMessage(
                 Array.isArray(channel) ? channel[i] : channel,
                 Array.isArray(text) ? text[i] : text)
-                .then(val => outputs[i] = JSON.stringify(val))
-                .catch(err => outputs[i] = JSON.stringify(err));
+                .then(val => outputs[i] = JSON.stringify({ok: true, body: val}))
+                .catch(err => outputs[i] = JSON.stringify({ok: false, body: err}));
             promises.push(promise);
         }
         await Promise.all(promises);

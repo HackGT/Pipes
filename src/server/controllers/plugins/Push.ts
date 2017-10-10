@@ -52,8 +52,8 @@ export class Push extends OutputPlugin {
             	appId,
             	Array.isArray(content) ? content[i] : content,
             	apiKey)
-                .then(val => outputs[i] = JSON.stringify(val))
-                .catch(err => outputs[i] = JSON.stringify(err));
+                .then(val => outputs[i] = JSON.stringify({ok: true, body: val}))
+                .catch(err => outputs[i] = JSON.stringify({ok: false, body: err}));
             promises.push(promise);
         }
         await Promise.all(promises);
