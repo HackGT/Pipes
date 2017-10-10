@@ -1,8 +1,10 @@
-import { Transform} from 'stream';
+import { Transform } from 'stream';
 
 import { commonOptions, pipeInput, pipeOutput, Node, input } from './Node';
 
 export abstract class OutputPlugin extends Transform implements Node{
+
+    public readonly isOutput = true;
 
     public numIter = null;
 
@@ -16,12 +18,12 @@ export abstract class OutputPlugin extends Transform implements Node{
 
     public abstract isSatisfied(): boolean;
 
-    public _write(chunk: any, encoding: string, callback: Function): void {
+    public _transform(chunk: any, encoding: string, callback: Function): void {
         const { iterable, val, key } = this.decomposeInput(chunk);
         this.buildDependencies(iterable, val, key);
         if (this.isSatisfied()) {
             this.propagate().then(outputMessage => {
-                this.push(`[${this.getNodeName()}]: ${outputMessage}`);
+                this.push({value: outputMessage});
                 callback();
             });
         } else{

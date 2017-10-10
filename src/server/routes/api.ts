@@ -56,7 +56,9 @@ router.post('/:project/:pipe', async (req, res, next) => {
 
     const pipe = new Pipe();
     pipe.parseFromString(project.pipes[0].graph);
-    res.json(pipe.run(req.body));
+    pipe.run(req.body, (out) => {
+        res.json(out);
+    });
 });
 
 function unauthorized(res) {

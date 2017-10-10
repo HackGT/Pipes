@@ -50,9 +50,9 @@ export class Email extends OutputPlugin {
             const client = nodemailer.createTransport(sgTransport(options));
             const promise = client.sendMail(email)
                 .then((val)=>{
-                    outputs[i] = JSON.stringify(val);
+                    outputs[i] = JSON.stringify({ok: true, body: val})
                 }).catch((err) => {
-                    outputs[i] = JSON.stringify(err);
+                    outputs[i] = JSON.stringify({ok: false, body: err})
                 });
             promises.push(promise);
         }

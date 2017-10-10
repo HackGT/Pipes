@@ -8,4 +8,4 @@ pipe.parseFromString(`
     "MDMyNmQ5N2YtZDU5YS00OGY3LWE4MTMtYzMwMjc0MzNmZmJi"-[apiKey]->b
 `);
 // https://mighty-sierra-43455.herokuapp.com to sign up for notifications
-pipe.run({a:{data:"hello", iterable: false}});
+pipe.run({a:{data:"hello", iterable: false}}, out => console.log(out));

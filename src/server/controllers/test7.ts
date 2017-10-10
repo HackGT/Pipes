@@ -10,4 +10,4 @@ pipe.parseFromString(`
     ""-[accessTokenSecret]->b
 `);
 
-pipe.run({a:{data:['hell0', 'from', 'hackgt'], iterable: true}});
+pipe.run({a:{data:['hell0', 'from', 'hackgt'], iterable: true}}, out => console.log(out));

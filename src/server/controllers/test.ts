@@ -1,5 +1,3 @@
-
-
 // Input 1
 //        \
 //        [0]
@@ -18,38 +16,19 @@ import { Concat } from './plugins/Concat';
 import { Logger } from './plugins/Logger';
 import Pipe from './Pipe';
 
-const Inputs = {
-    input1: new Input(), // Takes in value from Pipe and pushes forward { 'data': value }
-    input2: new Input() // Takes in value from Pipe and pushes forward { 'data': value }
-};
+const pipe2 = new Pipe();
+pipe2.parseFromString(`
+message: Input, slack: Slack, c: Concat, log: Logger |
 
-// Map the data from each input to keys 0 and 1
-const input1Toconcat = new Mapper({'data': '0'});
-const input2Toconcat = new Mapper({'data': '1'});
+"xoxb-253125341936-T9RWxB7LVveKh0EVxSCBxRGQ"-[token]->slack |
+"#bot-test-2"-[channel]->slack |
+"2"-[len]->c |
 
-const staticVal = new Static({data: '2'}); // Will always output {'data': 2}
-const staticValToconcat = new Mapper({'data': 'len'}); // Maps the data from the staticVal to key 'len'
-
-const concat = new Concat(); // Takes len and waits for two inputs of key [0...len-1] then pushes forward { 'data': val[0] + val[1] + ... + val[len] }
-
-const log = new Logger(); // Takes input of key data and logs it to console
-
-Inputs.input1.pipe(input1Toconcat);
-Inputs.input2.pipe(input2Toconcat);
-staticVal.pipe(staticValToconcat);
-staticValToconcat.pipe(concat);
-input1Toconcat.pipe(concat);
-input2Toconcat.pipe(concat);
-concat.pipe(log);
-
-const pipe = new Pipe(Inputs);
-pipe.run({
-    input1: {
-    	data:'hello',
-    	iterable: false
-    },
-    input2: {
-    	data: ' world',
-    	iterable: false
-    }
-});
+"[slack #announcements]: @channel  " -[0]->c |
+message -[1]->c |
+c-[text]->slack |
+c-[data]->log
+`);
+pipe2.run({
+    message: { data: 'hi', iterable: false }
+}, out => console.log(out));
