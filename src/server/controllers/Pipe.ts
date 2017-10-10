@@ -10,7 +10,6 @@ import { Slack } from './plugins/Slack';
 import { Twitter } from './plugins/Twitter';
 import { GraphQL } from './plugins/Graphql';
 import { Push } from './plugins/Push';
-import { Twitter } from './plugins/Twitter';
 
 type NodeConstructor = { new(): Input | TransformPlugin | OutputPlugin };
 
