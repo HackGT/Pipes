@@ -18,17 +18,12 @@ import Pipe from './Pipe';
 
 const pipe2 = new Pipe();
 pipe2.parseFromString(`
-message: Input, slack: Slack, c: Concat, log: Logger |
-
-"xoxb-253125341936-T9RWxB7LVveKh0EVxSCBxRGQ"-[token]->slack |
-"#bot-test-2"-[channel]->slack |
-"2"-[len]->c |
-
-"[slack #announcements]: @channel  " -[0]->c |
-message -[1]->c |
-c-[text]->slack |
+c: Concat, log: Logger |
+["Hello",
+"goodbye",
+"My bad"] -[0]->c |
+"!!!" -[1]->c |
+"2" -[len]->c |
 c-[data]->log
 `);
-pipe2.run({
-    message: { data: 'hi', iterable: false }
-}, out => console.log(out));
+pipe2.run({}, out => console.log(out));

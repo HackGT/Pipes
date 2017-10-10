@@ -114,16 +114,15 @@ export default class Pipe {
 
         // bind edges to mappers
         for (const line of lines) {
-            const regex = /(.*)-\[(.*)\]->(.*)/;
+            const regex = /((.|\s)*)-\[(.*)\]->(.*)/;
             const result = regex.exec(line);
-
             if (result === null) {
                 throw new Error('Edges must be in the format: {from}-[{prop}]->{to}');
             }
 
             const from = result[1].trim();
-            const prop = result[2].trim();
-            const to = result[3].trim();
+            const prop = result[3].trim();
+            const to = result[4].trim();
 
             if (from === '' || prop === '' || to === '') {
                 throw new Error('Edges must be in the format: {from}-[{prop}]->{to}');
@@ -139,10 +138,24 @@ export default class Pipe {
 
             // Static values to Nodes
             if (from.charAt(0) === '"' && from.charAt(from.length - 1) === '"') {
-                const val = new Static({ data: from.slice(1, from.length - 1) });
+                const val = new Static(from.slice(1, from.length - 1));
                 const map = new Mapper({ 'data': prop });
                 val.pipe(map).pipe(nodes[to], {end: false});
+            } else if(/\[(".*",?\s*?)*\]/g.test(from)) {
+                const arrayElems = from.slice(1, from.length-1).split(',');
+                const arr = [];
+                for(const elem of arrayElems) {
+                    const s = elem.trim();
+                    if(s.charAt(0) !== '"' || s.charAt(s.length-1) !== '"') {
+                        throw new Error('Arrays can only contain strings');
+                    }
+                    arr.push(s.slice(1,s.length-1));
+                }
 
+
+                const val = new Static(arr);
+                const map = new Mapper({ 'data': prop });
+                val.pipe(map).pipe(nodes[to], {end: false});
             } else { // Nodes to Nodes
                 if (!(from in nodes)) {
                     throw new Error(`Node ${from} must be declared.`);
