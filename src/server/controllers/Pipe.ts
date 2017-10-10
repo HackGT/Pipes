@@ -7,8 +7,9 @@ import { Concat } from './plugins/Concat';
 import { Logger } from './plugins/Logger';
 import { Email } from './plugins/Email';
 import { Slack } from './plugins/Slack';
-import { Push } from './plugins/Push';
 import { Twitter } from './plugins/Twitter';
+import { GraphQL } from './plugins/Graphql';
+import { Push } from './plugins/Push';
 import {Writable} from 'stream';
 import { commonOptions } from './Node';
 
@@ -21,6 +22,7 @@ const plugins: { [pluginName: string]: NodeConstructor } = {
     'Slack': Slack,
     'Twitter': Twitter,
     'Email': Email,
+    'GraphQL': GraphQL,
     'Push': Push,
 };
 const illegalProperties = [
