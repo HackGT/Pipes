@@ -1,38 +1,40 @@
 var request = require('request');
 
-import { OutputPlugin } from '../Output';
+import { TransformPlugin } from '../Transformer';
+import { pipeOutput } from '../Node';
 
 
 
 type pluginDependencies = {
-    method: string | string[],
-    url: string | string[],
-    query: string | string[],
-    auth: string | string[],
+    method: string,
+    url: string,
+    query: string,
+    auth: string,
+    selector: string
 }
 
 //todo add support for optional args
 type pluginOptionals = {
-    operationName: string | string[],
-    variables: string | string[]
+    operationName: string,
+    variables: string
 }
 
-export class GraphQL extends OutputPlugin {
+export class GraphQL extends TransformPlugin {
 
     private dependencies: pluginDependencies = {
         method: null,
         url: null,
         query: null,
         auth: null,
+        selector: null,
     };
 
-    public async propagate(): Promise<string | string[]> {
-        const { method, url, query, auth } = this.dependencies;
+    public async propagate(): Promise<pipeOutput> {
+        const { method, url, query, auth, selector } = this.dependencies;
 
-        const promises = [];
-        const outputs = [];
+        let output;
 
-        const sendQuery = (method, url, query, auth) => new Promise((resolve, reject) => {
+        const sendQuery = () => new Promise((resolve, reject) => {
                 const requestCallback = (err, response, body) => {
                     if (err) {
                         reject(err);
@@ -56,22 +58,16 @@ export class GraphQL extends OutputPlugin {
             }
         );
 
-        if(this.numIter === null) this.numIter = 1;
-        for (let i = 0; i < this.numIter; i++) {
-            const promise = sendQuery(
-                Array.isArray(method) ? method[i] : method,
-                Array.isArray(url) ? url[i] : url,
-                Array.isArray(query) ? query[i] : query,
-                Array.isArray(auth) ? auth[i] : auth)
-                .then(val => outputs[i] = JSON.stringify(val))
-                .catch(err => outputs[i] = JSON.stringify(err));
-            promises.push(promise);
-        }
-        await Promise.all(promises);
+        const promise = sendQuery()
+                .then(val => output = val)
+                .catch(err => output = JSON.stringify(err));
 
-        console.log(outputs);
-        if (outputs.length === 1) return outputs[0];
-        return outputs;
+        await(promise);
+
+        output = JSON.parse(output)['data'];
+        const formattedOutput = [];
+        this.parseHelper(output, selector.split("."), formattedOutput);
+        return {data: formattedOutput, iterable: true};
     }
 
     public getNodeName(): string {
@@ -81,20 +77,35 @@ export class GraphQL extends OutputPlugin {
     public buildDependencies(iterable, value, key) {
         switch (key) {
             case 'method':
-                this.setIterables(iterable, value, key);
+                if (iterable || Array.isArray(value))
+                    throw Error(`GraphQL's property 'method' must be a single string. 
+                    Unexpected value ${value}`);
                 this.dependencies.method = value;
                 break;
             case 'url':
-                this.setIterables(iterable, value, key);
+                if (iterable || Array.isArray(value))
+                    throw Error(`GraphQL's property 'url' must be a single string. 
+                    Unexpected value ${value}`);
                 this.dependencies.url = value;
                 break;
             case 'query':
-                this.setIterables(iterable, value, key);
+                if (iterable || Array.isArray(value))
+                    throw Error(`GraphQL's property 'query' must be a single string. 
+                    Unexpected value ${value}`);
                 this.dependencies.query = value;
                 break
             case 'auth':
-                this.setIterables(iterable, value, key);
+                if (iterable || Array.isArray(value))
+                    throw Error(`GraphQL's property 'auth' must be a single string. 
+                    Unexpected value ${value}`);
                 this.dependencies.auth = value;
+                break
+            case 'selector':
+                if (iterable || Array.isArray(value))
+                    throw Error(`GraphQL's property 'selector' must be a single string. 
+                    Unexpected value ${value}`);
+                this.dependencies.selector = value;
+                break
         }
     }
 
@@ -102,6 +113,21 @@ export class GraphQL extends OutputPlugin {
         return this.dependencies.method !== null &&
             this.dependencies.url !== null &&
             this.dependencies.query !== null &&
+            this.dependencies.selector !== null &&
             this.dependencies.auth !== null;
+    }
+
+    private parseHelper(json, selector, out) {
+        let current = json;
+        for (let i = 0; i < selector.length; i++) {
+            current = current[selector[i]];
+            if (Array.isArray(current)) {
+                for (let j = 0; j < current.length; j++) {
+                    this.parseHelper(current[j], selector.slice(i+1), out)
+                }
+                return;
+            }
+        }
+        out.push(current);    
     }
 }
