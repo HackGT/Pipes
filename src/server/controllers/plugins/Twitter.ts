@@ -52,8 +52,8 @@ export class Twitter extends OutputPlugin {
         for (let i = 0; i < this.numIter; i++) {
             const promise = sendMessage(
                 Array.isArray(status) ? status[i] : status)
-                .then(val => outputs[i] = JSON.stringify(val))
-                .catch(err => outputs[i] = JSON.stringify(err));
+                .then(val => outputs[i] = JSON.stringify({ok: true, body: val}))
+                .catch(err => outputs[i] = JSON.stringify({ok: false, body: err}));
             promises.push(promise);
         }
 

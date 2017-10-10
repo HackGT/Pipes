@@ -22,7 +22,7 @@ export class Logger extends OutputPlugin {
         } else {
             console.log(`[${this.getNodeName()}]: ${this.dependencies.data}`);
         }
-        return 'success';
+        return JSON.stringify({ok: true});
     }
 
     public buildDependencies(iterable, value, key) {

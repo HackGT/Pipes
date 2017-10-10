@@ -2,11 +2,11 @@ import { Input } from '../Input';
 import { pipeOutput } from '../Node';
 
 export class Static extends Input {
-    constructor(config: { data: string }) {
+    constructor(data: string | string[]) {
         super();
         const output: pipeOutput = {
-            data: config.data,
-            iterable: false
+            data: data,
+            iterable: Array.isArray(data)
         };
 
         this.push(output);

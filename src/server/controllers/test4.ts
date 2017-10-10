@@ -10,4 +10,4 @@ pipe.parseFromString(`
     "xoxb-252879716786-j0dDXNwhVNsoh5J5QHYQuui9"-[token]->b
 `);
 
-pipe.run({a:{data:['hi', 'hello', 'bye'], iterable: true}});
+pipe.run({a:{data:['hi', 'hello', 'bye'], iterable: true}}, out => console.log(out));
