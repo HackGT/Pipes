@@ -12,6 +12,7 @@ import { GraphQL } from './plugins/Graphql';
 import { Push } from './plugins/Push';
 import {Writable} from 'stream';
 import { commonOptions } from './Node';
+import { SlackHook } from './plugins/SlackHook';
 
 type NodeConstructor = { new(): Input | TransformPlugin | OutputPlugin };
 
@@ -24,6 +25,7 @@ const plugins: { [pluginName: string]: NodeConstructor } = {
     'Email': Email,
     'GraphQL': GraphQL,
     'Push': Push,
+    'SlackHook': SlackHook
 };
 const illegalProperties = [
     'iterable'

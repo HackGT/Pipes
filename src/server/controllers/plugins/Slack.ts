@@ -28,7 +28,8 @@ export class Slack extends OutputPlugin {
                 slack.api('chat.postMessage', {
                     channel,
                     text,
-                    parse: 'full'
+                    parse: 'full',
+                    as_user: true
                 }, function (err, response) {
                     if (err) {
                         reject(err);
