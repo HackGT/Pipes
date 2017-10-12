@@ -1,4 +1,4 @@
-export const APP_URL = process.env.url;
+export const APP_URL = process.env.ROOT_URL;
 
 export const COOKIE_OPTIONS = {
     'path': '/',

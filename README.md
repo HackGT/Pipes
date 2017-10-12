@@ -79,11 +79,11 @@ ENV VARIABLES
 - sessionSecret
 - githubId
 - githubSecret
-- url
 - cookieMaxAge
 - cookieSecureOnly
 - MONGO_URL
 - PORT
+- ROOT_URL
 
 ## Tests
 

@@ -3,7 +3,6 @@ const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const webpack = require("webpack");
 const path = require("path");
-const config = require('../../config.json');
 
 // Load HTML files
 const loadLandingPage = new HtmlWebpackPlugin({
@@ -40,7 +39,7 @@ module.exports = {
     output: {
         filename: "bundle.js",
         path: path.resolve(__dirname, "../../out/public/app"),
-        publicPath: config.server.url + '/app'
+        publicPath: process.env.ROOT_URL + '/app'
     },
     
     // Enable sourcemaps for debugging webpack's output.
