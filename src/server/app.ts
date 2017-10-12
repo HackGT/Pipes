@@ -20,7 +20,6 @@ import { IUser, User, UserClass } from './model/User';
 const session = require('express-session');
 const GithubStrategy = require('passport-github2').Strategy as any;
 const flash = require('connect-flash');
-const config = require(process.env.SETTINGS_FILE);
 
 
 const app: express.Express = express();
@@ -30,8 +29,8 @@ mongoose.connect(process.env.MONGO_URL || 'mongodb://localhost/', {
     useMongoClient: true
 });
 passport.use(new GithubStrategy({
-    clientID: config.secrets.github.id,
-    clientSecret: config.secrets.github.secret,
+    clientID: process.env.githubId,
+    clientSecret: process.env.githubSecret,
     callbackURL: `${APP_URL}/auth/callback`
 }, async (accessToken, refreshToken, profile, done) => {
     if (profile.emails === undefined) {
@@ -83,7 +82,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(session({
-    secret: config.secrets.session,
+    secret: process.env.sessionSecret,
     resave: true,
     saveUninitialized: true
 }));

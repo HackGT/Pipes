@@ -1,11 +1,9 @@
-const config = require('../../config.json');
-
-export const APP_URL = config.server.url;
+export const APP_URL = process.env.url;
 
 export const COOKIE_OPTIONS = {
     'path': '/',
-    'maxAge': config.server.cookieMaxAge,
-    'secure': config.server.cookieSecureOnly,
+    'maxAge': process.env.cookieMaxAge,
+    'secure': process.env.cookieSecureOnly,
     'httpOnly': true
 };
 
