@@ -13,6 +13,7 @@ import { Push } from './plugins/Push';
 import {Writable} from 'stream';
 import { commonOptions } from './Node';
 import { SlackHook } from './plugins/SlackHook';
+import { Facebook } from './plugins/Facebook';
 
 type NodeConstructor = { new(): Input | TransformPlugin | OutputPlugin };
 
@@ -25,7 +26,8 @@ const plugins: { [pluginName: string]: NodeConstructor } = {
     'Email': Email,
     'GraphQL': GraphQL,
     'Push': Push,
-    'SlackHook': SlackHook
+    'SlackHook': SlackHook,
+    'Facebook': Facebook
 };
 const illegalProperties = [
     'iterable'
