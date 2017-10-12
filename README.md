@@ -75,8 +75,15 @@ We can maybe use [SemVer](http://semver.org/) for versioning. For the versions a
 
 ## Configuration
 
-Here you should write what are all of the configurations a user can enter when
-using the project.
+ENV VARIABLES
+- sessionSecret
+- githubId
+- githubSecret
+- cookieMaxAge
+- cookieSecureOnly
+- MONGO_URL
+- PORT
+- ROOT_URL
 
 ## Tests
 
