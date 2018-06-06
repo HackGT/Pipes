@@ -79,3 +79,5 @@ test\.js
 runner2\.js
 
 .vscode/
+
+queue\.js

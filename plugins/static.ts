@@ -1,31 +1,15 @@
 import { InputPlugin } from "./plugin";
 
 interface Output {
-	"data": string;
+	"static_data": string;
 }
 
-export class Static extends InputPlugin {
-	public static readonly verbs: string[] = [];
-	
-	public static readonly outputs: (keyof Output)[] = ["data"];
+export class Static extends InputPlugin<Output> {
+	public name = "Static Content";
 
-	private readonly data: string;
+	constructor(private readonly data: string) {
+		super(["static_data"]);
 
-	constructor(config: { data: string }) {
-		super();
-
-		this.data = config.data;
-		let output: Output = {
-			data: this.data
-		};
-		this.push(output);
-	}
-
-	public parseLanguage(verb: string, tokens: any[]): any {
-		return null;
-	}
-
-	public _read(size: number) {
-		this.push(null);
+		this.publish("static_data", this.data);
 	}
 }

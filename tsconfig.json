@@ -4,17 +4,24 @@
         "target": "es6",
         "lib": [
             "es6",
-            "es2015.promise",
-            "dom"
+            "es2017",
+            "es2015.promise"
         ],
         "sourceMap": true,
         "alwaysStrict": true,
         "strictNullChecks": true,
-        "noImplicitAny": true,
+        "noImplicitAny": false,
         "noImplicitReturns": true,
         "noUnusedLocals": true,
         "plugins": [
             { "name": "tslint-language-service"}
         ]
-    }
+    },
+    "files": [
+        "test.ts",
+        "queue.ts",
+        "plugins/console.ts",
+        "plugins/static.ts",
+        "plugins/capitalization.ts"
+    ]
 }
