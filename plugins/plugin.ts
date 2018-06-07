@@ -9,6 +9,9 @@ enum State { Flowing, Paused, Errored };
 
 export abstract class TransformPlugin<In, Out> {
 	public abstract name: string;
+	public setName(name: string): void {
+		this.name = name;
+	}
 	public state: State = State.Paused;
 
 	constructor(public readonly inputTopics: (keyof In)[], public readonly outputTopics: (keyof Out)[]) {}
