@@ -22,6 +22,8 @@
         "queue.ts",
         "plugins/console.ts",
         "plugins/static.ts",
-        "plugins/capitalization.ts"
+        "plugins/capitalization.ts",
+        "plugins/encrypt.ts",
+        "plugins/decrypt.ts"
     ]
 }

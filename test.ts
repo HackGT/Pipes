@@ -14,7 +14,19 @@
 import { Static } from "./plugins/static";
 import { Console } from "./plugins/console";
 import { Capitalization } from "./plugins/capitalization";
+import { Encrypt } from "./plugins/encrypt";
+import { Decrypt } from "./plugins/decrypt";
 
 const stat = new Static("Hello world from Pipeline!");
 
-stat.pipe(new Capitalization(), {"static_data": "text"}).pipe(new Console(), {"capitalized": "console_data"});
+const password = new Static("passw0rd");
+const encrypt = new Encrypt();
+const decrypt = new Decrypt();
+password.pipe(encrypt, {"static_data": "password"}, false);
+password.pipe(decrypt, {"static_data": "password"});
+
+stat.pipe(new Capitalization(), {"static_data": "text"})
+    .pipe(new Console(), {"capitalized": "console_data"})
+    .pipe(encrypt, {"console_data": "data"});
+encrypt.pipe(new Console(), {"encryptedSimple": "console_data"}, false);
+encrypt.pipe(decrypt, {"encryptionResult": "encryptionResult"}).pipe(new Console(), {"data": "console_data"});
