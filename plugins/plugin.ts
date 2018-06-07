@@ -1,9 +1,10 @@
 import { Queue } from "../queue";
 
 type Mapped<From, To> = {
-	[P in keyof From]: keyof To
+	[P in keyof From]?: keyof To
 }
 type Listener<T> = (data: T[keyof T]) => Promise<void>;
+type Receiver<In, P extends keyof In> = (data: In[P]) => Promise<void>;
 enum State { Flowing, Paused, Errored };
 
 export abstract class TransformPlugin<In, Out> {
@@ -48,23 +49,40 @@ export abstract class TransformPlugin<In, Out> {
 		}
 	}
 
-	private receivers: Map<keyof In, Set<Listener<In>>> = new Map();
-	protected addReceiver(topic: keyof In, receiver: Listener<In>) {
+	private receivers: Map<keyof In, Set<Receiver<In, keyof In>>> = new Map();
+	protected addReceiver<T extends keyof In>(topic: T, receiver: Receiver<In, T>) {
 		if (!this.receivers.has(topic)) {
 			this.receivers.set(topic, new Set());
 		}
 		this.receivers.get(topic)!.add(receiver);
 	}
-	protected async receive<K extends keyof In>(topic: K, data: In[K]): Promise<void> {
+	private readBuffer = new Queue<[keyof In, In[keyof In]]>();
+	private receiveState = State.Flowing;
+	protected async receive(topic: keyof In, data: In[keyof In]): Promise<void> {
 		// Dispatch to declared receivers
-		let executions: Promise<void>[] = [];
-		let receivers = this.receivers.get(topic);
-		if (receivers) {
-			receivers.forEach(receiver => {
-				executions.push(receiver(data));
-			});
+		if (this.receiveState !== State.Flowing) {
+			this.readBuffer.enqueue([topic, data]);
 		}
-		await Promise.all(executions);
+		else {
+			this.receiveState = State.Paused;
+			const dispatcher = async () => {
+				let executions: Promise<void>[] = [];
+				let receivers = this.receivers.get(topic);
+				if (receivers) {
+					receivers.forEach(receiver => {
+						executions.push(receiver(data));
+					});
+				}
+				await Promise.all(executions);
+			}
+			await dispatcher();
+			// Handle any received messages that were given to us while we were busy
+			while (this.readBuffer.length > 0) {
+				[topic, data] = this.readBuffer.dequeue()!;
+				await dispatcher();
+			}
+			this.receiveState = State.Flowing;
+		}
 	}
 
 	// Sets up a pipe to another plugin; can be called multiple times
