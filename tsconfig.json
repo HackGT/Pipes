@@ -16,14 +16,5 @@
         "plugins": [
             { "name": "tslint-language-service"}
         ]
-    },
-    "files": [
-        "test.ts",
-        "queue.ts",
-        "plugins/console.ts",
-        "plugins/static.ts",
-        "plugins/capitalization.ts",
-        "plugins/encrypt.ts",
-        "plugins/decrypt.ts"
-    ]
+    }
 }

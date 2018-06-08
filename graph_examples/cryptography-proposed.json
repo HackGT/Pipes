@@ -1,16 +1,30 @@
 {
+    "version": "2.0.0",
+    "plugins": {
+        "Static": "../plugins/static",
+        "Console": "../plugins/console",
+        "Capitalization": "../plugins/capitalization",
+        "Encrypt": "../plugins/encrypt",
+        "Decrypt": "../plugins/decrypt"
+    },
     "nodes": {
-        "input_1": {
+        "static": {
             "type": "Static",
-            "data": "Hello, world!"
+            "arguments": ["Hello world from a graph file!"]
         },
-        "encrypt_1": {
-            "type": "Encrypt",
-            "password": "gatech"
+        "password": {
+            "type": "Static",
+            "name": "Password Setter",
+            "arguments": ["passw0rd"]
         },
-        "decrypt_1": {
-            "type": "Decrypt",
-            "password": "gatech"
+        "capitalization": {
+            "type": "Capitalization"
+        },
+        "encrypt": {
+            "type": "Encrypt"
+        },
+        "decrypt": {
+            "type": "Decrypt"
         },
         "log_1": {
             "type": "Console"
@@ -24,33 +38,51 @@
     },
     "connections": [
         {
-            "from": "input_1", "to": "encrypt_1",
+            "from": "password", "to": "encrypt",
             "mapping": {
-                "data": "data"
+                "static_data": "password"
             }
         },
         {
-            "from": "log_1", "to": "decrypt_1",
+            "from": "password", "to": "decrypt",
             "mapping": {
-                "data": "encrypted"
+                "static_data": "password"
             }
         },
         {
-            "from": "encrypt_1", "to": "log_1",
+            "from": "static", "to": "capitalization",
             "mapping": {
-                "encrypted": "data"
+                "static_data": "text"
             }
         },
         {
-            "from": "decrypt_1", "to": "log_2",
+            "from": "capitalization", "to": "log_1",
             "mapping": {
-                "data": "data"
+                "capitalized": "console_data"
             }
         },
         {
-            "from": "input_1", "to": "log_3",
+            "from": "log_1", "to": "encrypt",
             "mapping": {
-                "data": "data"
+                "console_data": "data"
+            }
+        },
+        {
+            "from": "encrypt", "to": "log_2",
+            "mapping": {
+                "encryptedSimple": "console_data"
+            }
+        },
+        {
+            "from": "encrypt", "to": "decrypt",
+            "mapping": {
+                "encryptionResult": "encryptionResult"
+            }
+        },
+        {
+            "from": "decrypt", "to": "log_3",
+            "mapping": {
+                "data": "console_data"
             }
         }
     ]

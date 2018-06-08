@@ -1,25 +1,22 @@
-import * as fs from "fs";
+import { promises as fs } from "fs";
 import * as path from "path";
-import * as util from "util";
-import { InputPlugin, TransformPlugin, OutputPlugin, Mapper, MultiPipe } from "./plugins/plugin";
+import { TransformPlugin } from "./plugins/plugin";
 
-type AnyPlugin = (typeof InputPlugin | typeof TransformPlugin | typeof OutputPlugin) & {
-    new(config: Object): InputPlugin | TransformPlugin | OutputPlugin   
-};
-type Node = (InputPlugin | TransformPlugin | OutputPlugin | Mapper);
-type Pipeline = {
-    [name: string]: {
-        node: Mapper | OutputPlugin;
-        rawNode: Node;
-        pipedTo: string[];
-    }
+type CommonPlugin = TransformPlugin<object, object>;
+interface CommonPluginConstructor {
+    new(...args: any[]): CommonPlugin;
 };
 
 interface InputFormat {
+    version: number;
+    plugins: {
+        [name: string]: string;
+    }
     nodes: {
         [nodeName: string]: {
             type: string;
-            [property: string]: any;
+            name?: string;
+            arguments?: any[];
         };
     };
     connections: {
@@ -30,86 +27,79 @@ interface InputFormat {
        };
     }[];
 }
-let plugins: { [pluginName: string]: AnyPlugin } = {};
 
-export async function loadPlugins(dir: string = "plugins") {
-    let readdirAsync = util.promisify(fs.readdir) as (path: string | Buffer) => Promise<string[]>;
-    let files = await readdirAsync(path.join(__dirname, dir));
-    for (let file of files) {
-        if (path.extname(file) === ".js" && path.basename(file) !== "plugin.js") {
-            try {
-                let imported = await import(path.join(__dirname, dir, path.basename(file, ".js")));
-                // Plugins only export one thing
-                let plugin = imported[Object.keys(imported)[0]] as AnyPlugin;
-
-                plugins[plugin.name] = plugin;
-                console.log(`Loaded plugin: ${plugin.name} from ${file}`);
+export async function loadPlugins(input: InputFormat, file: string): Promise<Map<string, CommonPluginConstructor>> {
+    
+    let plugins: Map<string, CommonPluginConstructor> = new Map();
+    for (let [name, location] of Object.entries(input.plugins)) {
+        try {
+            // Resolve locations relative to the graph file instead of runner.ts
+            location = path.join(__dirname, path.dirname(file), location);
+            let plugin = (await import(location))[name] as CommonPluginConstructor | undefined;
+            if (!plugin) {
+                throw new Error(`Plugin at ${location} did not match name "${name}"`);
             }
-            catch (err) {
-                console.warn(`Could not load plugin from ${file}: ${err.message}`);
-            }
+            plugins.set(name, plugin);
+            console.log(`Loaded plugin: ${name} from ${location}`);
         }
+        catch (err) {
+            console.warn(`Could not load plugin ${name} from ${location}: ${err.message}`);
+        }
+    }
+    return plugins;
+}
+
+function moveToBack<T>(arr: T[], item: T): T[] {
+    let index = arr.indexOf(item);
+    if (index !== -1) {
+        arr.splice(index, 1);
+    }
+    arr.push(item);
+    return arr;
+}
+
+export async function execute(file: string) {
+    const graph = JSON.parse(await fs.readFile(file, "utf8")) as InputFormat;
+    const plugins = await loadPlugins(graph, file);
+    let nodes: Map<string, CommonPlugin> = new Map();
+    for (let [name, details] of Object.entries(graph.nodes)) {
+        let plugin = plugins.get(details.type);
+        if (!plugin) {
+            throw new Error(`Node "${name}" requested nonexistent plugin "${details.type}"`);
+        }
+        let node = details.arguments ? new plugin(...details.arguments) : new plugin();
+        if (details.name) {
+            node.setName(details.name);
+        }
+        nodes.set(name, node);
+    }
+
+    let resumeOrder: string[] = [];
+    for (let connection of graph.connections) {
+        let from = nodes.get(connection.from);
+        let to = nodes.get(connection.to);
+        if (!from) {
+            throw new Error(`Invalid source node "${from}"`);
+        }
+        if (!to) {
+            throw new Error(`Invalid destination node "${to}"`);
+        }
+        from.pipe(to, connection.mapping, false);
+        moveToBack(resumeOrder, connection.from);
+    }
+    
+    for (let nodeToResume of resumeOrder) {
+        let node = nodes.get(nodeToResume);
+        if (!node) continue;
+        await node.resume();
     }
 }
 
-export async function parse(input: InputFormat): Promise<Pipeline> {
-    let pipeline: Pipeline = {};
-
-    let froms: string[] = [];
-    let tos: string[] = [];
-    let resolvedTos: string[] = [];
-
-    for (let connection of input.connections) {
-        froms.push(connection.from);
-        tos.push(connection.to);
+(async function() {
+    try {
+        await execute("./graph_examples/cryptography-proposed.json");
     }
-
-    function addToChain(fromName: string, toName: string, mapping: { [mapping: string]: string }): void {
-
-        if (pipeline[fromName] === undefined) {
-            let plugin = plugins[input.nodes[fromName].type];
-            let instance = new plugin(input.nodes[fromName]);
-            pipeline[fromName] = {
-                "node": instance.pipe(new Mapper(mapping, fromName)),
-                "rawNode": instance,
-                "pipedTo": [toName]
-            };
-            console.log(`Mapping for ${fromName} is ${JSON.stringify(mapping)}`);
-        }
-        else {
-            pipeline[fromName].pipedTo.push(toName);
-        }
-        resolvedTos.push(toName);
+    catch (err) {
+        console.error(err.stack);
     }
-
-    for (let connection of input.connections) {
-        addToChain(connection.from, connection.to, connection.mapping);
-        console.log(`Add node: ${connection.from}`);
-
-        if (froms.indexOf(connection.to) === -1) {
-            let plugin = plugins[input.nodes[connection.to].type];
-            let instance = new plugin(input.nodes[connection.to]) as OutputPlugin;
-            pipeline[connection.to] = {
-                "node": instance,
-                "rawNode": instance,
-                "pipedTo": []
-            };
-            console.log(`Add terminating node: ${connection.to}`);
-        }
-    }
-
-    return pipeline;
-}
-
-export async function execute(pipeline: Pipeline) {
-    for (let nodeName of Object.keys(pipeline)) {
-        let pipelineObject = pipeline[nodeName];
-        let node = pipelineObject.node;
-
-        if (pipelineObject.pipedTo.length > 0) {
-            let pipedNodes = pipelineObject.pipedTo.map(pipedNodeName => pipeline[pipedNodeName].rawNode) as (TransformPlugin | OutputPlugin)[];
-            node.pipe(new MultiPipe(pipedNodes));
-            console.log(`Piping ${nodeName} to ${pipelineObject.pipedTo.join(", ")}`);
-        }
-    }
-}
+})();
