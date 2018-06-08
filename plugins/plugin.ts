@@ -7,7 +7,7 @@ type Listener<T> = (data: T[keyof T]) => Promise<void>;
 type Receiver<In, P extends keyof In> = (data: In[P]) => Promise<void>;
 enum State { Flowing, Paused, Errored };
 
-export abstract class TransformPlugin<In, Out> {
+export abstract class TransformPlugin<In extends object, Out extends object> {
 	public abstract name: string;
 	public setName(name: string): void {
 		this.name = name;
@@ -89,7 +89,7 @@ export abstract class TransformPlugin<In, Out> {
 	}
 
 	// Sets up a pipe to another plugin; can be called multiple times
-	public pipe<CIn, COut>(plugin: TransformPlugin<CIn, COut>, mapping: Mapped<Out, CIn>, autoResume = true): TransformPlugin<CIn, COut> {
+	public pipe<CIn extends object, COut extends object>(plugin: TransformPlugin<CIn, COut>, mapping: Mapped<Out, CIn>, autoResume = true): TransformPlugin<CIn, COut> {
 		console.debug(`Piping: ${this.name} -> ${plugin.name}`);
 		// Set up listeners for mapped outputs
 		for (let [from, to] of Object.entries(mapping)) {
@@ -105,14 +105,14 @@ export abstract class TransformPlugin<In, Out> {
 	}
 }
 
-export abstract class InputPlugin<T> extends TransformPlugin<{}, T> {
+export abstract class InputPlugin<T extends object> extends TransformPlugin<{}, T> {
 	// InputPlugins publish data and don't depend on any other plugin
 	constructor(topics: (keyof T)[]) {
 		super([], topics);
 	}
 }
 
-export abstract class OutputPlugin<T> extends TransformPlugin<T, T> {
+export abstract class OutputPlugin<T extends object> extends TransformPlugin<T, T> {
 	constructor(topics: (keyof T)[]) {
 		super(topics, topics);
 	}
