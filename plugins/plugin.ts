@@ -16,14 +16,14 @@ export abstract class TransformPlugin<In extends object, Out extends object> {
 
 	constructor(public readonly inputTopics: (keyof In)[], public readonly outputTopics: (keyof Out)[]) {}
 
-	public resume(): void {
+	public async resume() {
 		this.state = State.Flowing;
 		while (this.writeBuffer.length > 0) {
 			let item = this.writeBuffer.dequeue()!;
-			this.publish(item[0], item[1]);
+			await this.publish(item[0], item[1]);
 		}
 	}
-	public pause(): void {
+	public pause() {
 		this.state = State.Paused;
 	}
 
