@@ -92,9 +92,15 @@ export abstract class TransformPlugin<In extends object, Out extends object> {
 	public pipe<CIn extends object, COut extends object>(plugin: TransformPlugin<CIn, COut>, mapping: Mapped<Out, CIn>, autoResume = true): TransformPlugin<CIn, COut> {
 		console.debug(`Piping: ${this.name} -> ${plugin.name}`);
 		// Set up listeners for mapped outputs
-		for (let [from, to] of Object.entries(mapping)) {
-			this.addEventListener(from as keyof Out, async (data: any) => {
-				plugin.receive(to as keyof CIn, data);
+		for (let [from, to] of Object.entries(mapping) as [keyof Out, keyof CIn][]) {
+			if (!this.outputTopics.includes(from)) {
+				console.warn(`From topic "${from}" is not an output topic on ${this.name}`);
+			}
+			if (!plugin.inputTopics.includes(to)) {
+				console.warn(`To topic "${to}" is not an input topic on ${plugin.name}`);
+			}
+			this.addEventListener(from, async (data: any) => {
+				plugin.receive(to, data);
 			});
 		}
 		if (autoResume) {
