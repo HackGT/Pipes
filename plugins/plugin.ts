@@ -9,8 +9,12 @@ enum State { Flowing, Paused, Errored };
 
 export abstract class TransformPlugin<In extends object, Out extends object> {
 	public abstract name: string;
+	private originalName = this.name;
 	public setName(name: string): void {
-		this.name = name;
+		if (!this.originalName) {
+			this.originalName = this.name;
+		}
+		this.name = `${name} (${this.originalName})`;
 	}
 	public state: State = State.Paused;
 
